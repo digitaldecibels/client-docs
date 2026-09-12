@@ -34,6 +34,12 @@ Contributed and core code is identified **by name and version from the
 dependency manifest**, never by reading its source. You do not need to open
 `web/modules/contrib/metatag` to know the site uses Metatag 2.1.
 
+**One exception**, and only when building the installed-modules section of a
+handoff: you may read the `description` key from a contributed module's
+`<name>.info.yml`, or the `description` from a package's `package.json`. That
+one key, from that one file. It is the cheapest honest source for what a module
+is for, and everything else under `contrib/` and `node_modules/` stays closed.
+
 ### Reading order
 
 1. Dependency manifests and configuration at the repository root
@@ -162,6 +168,16 @@ how content gets published, what an editor can change, what needs a developer.
 **Do not dump every Drupal file into the handoff.** Nobody needs a list of 140
 config entities. They need to know there are two content types and what each is
 for.
+
+Two lists are worth their length and are the exception to that: the installed
+modules with a line each, and the components an editor builds pages from with
+their fields. Both are things a reader looks up repeatedly rather than reads
+once. See `client-handoff` for how to keep each readable.
+
+Paragraph fields come from three files, not one: the field config for labels and
+required flags, the field storage for what it holds, and the form display for
+the order. **The form display is what decides the order an editor sees**, so a
+list built from the field files alone will be in the wrong order.
 
 ## Recording what you found
 

@@ -5,6 +5,23 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-09-12
+
+### Added
+- Two handoff sections. **What is installed** lists the contributed and custom
+  modules or packages with a plain-language line each, grouped by what a client
+  would recognise, flagging the development-only ones and any carrying a patch.
+  **The building blocks of a page** lists each component an editor builds with
+  and the fields they fill in.
+- A narrow exception to the scan budget: the `description` key may be read from
+  a contributed module's `.info.yml` or a package's `package.json`. That one key
+  from that one file, so a module's own words can be rewritten for the reader
+  rather than guessed at. Everything else under `contrib/` and `node_modules/`
+  stays closed.
+- Paragraph field order is taken from the form display's weights, not from the
+  order the field config files happen to be in, so the list matches what an
+  editor actually sees on the form.
+
 ## [1.2.0] - 2026-09-09
 
 ### Added

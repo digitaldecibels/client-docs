@@ -29,6 +29,63 @@ unknown and what would answer it.
 {{PLAIN_LANGUAGE_STACK_SUMMARY. Say what each piece does in a few words. Avoid
 jargon where a plain word exists.}}
 
+## What is installed
+
+Core supplies the basics. The list below is the additional software installed on
+top, and what each piece does here.
+
+### Editing
+
+| Module or package | What it does for this site |
+| --- | --- |
+| {{NAME}} | {{PLAIN_LANGUAGE_PURPOSE}} |
+
+### Media
+
+| Module or package | What it does for this site |
+| --- | --- |
+| {{NAME}} | {{PLAIN_LANGUAGE_PURPOSE}} |
+
+### Search engines and sharing
+
+| Module or package | What it does for this site |
+| --- | --- |
+| {{NAME}} | {{PLAIN_LANGUAGE_PURPOSE}} |
+
+### Built for this project
+
+{{CUSTOM_MODULES: a short paragraph each. What it does, and what stops working
+without it.}}
+
+### Development only
+
+These are installed for building the site and are not enabled on the live site.
+
+| Module or package | What it does |
+| --- | --- |
+| {{NAME}} | {{PURPOSE}} |
+
+{{PATCHED_MODULES, if any: name the module, say what the patch fixes, and note
+that the patch has to be re-checked when that module updates.}}
+
+Drop any group that is empty. Do not keep a heading with nothing under it.
+
+## The building blocks of a page
+
+Pages are assembled from the components below. Each one lists what you fill in
+when you add it.
+
+### {{COMPONENT_NAME}}
+
+{{ONE_LINE_PURPOSE}}
+
+| Field | What goes in it | Required |
+| --- | --- | --- |
+| {{FIELD_LABEL}} | {{PLAIN_LANGUAGE_TYPE}} | {{Yes_or_No}} |
+
+Repeat per component, in the order an editor meets them. Fields in the order the
+edit form shows them.
+
 ## Important addresses
 
 | Purpose | Address |
