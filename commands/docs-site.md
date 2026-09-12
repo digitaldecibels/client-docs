@@ -166,7 +166,26 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    primary colour has changed since last time, say so in the report rather than
    changing it silently.
 
-3. **Take the project's icon, if it has a real one.** Starlight shows it beside
+3. **Read `branding` in the manifest first.** Any key set there is the answer,
+   and detection is skipped for that key. It exists so a developer can stop the
+   guessing without editing generated files:
+
+   ```yaml
+   branding:
+     primary: '#003865'
+     secondary: '#E87722'
+     logo: web/themes/be_the_ray/images/logo-square.png
+     title: Bucknell Be The Ray
+   ```
+
+   Missing, `null` or empty means detect it as described below. Report which
+   values came from the manifest and which were detected, so it is obvious
+   which ones are a guess.
+
+   A `logo` path that does not exist is an error worth stopping for, not
+   something to silently fall back from. The developer meant that file.
+
+4. **Take the project's icon, if it has a real one.** Starlight shows it beside
    the title. Look in the project's own theme or app assets, never in a
    dependency:
 
@@ -201,7 +220,7 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    If nothing suitable exists, replace `{{LOGO_CONFIG}}` with nothing and say so
    in the report. Never generate an icon, and never use a stock one.
 
-4. **Take the project's primary colour**, and check it before using it.
+5. **Take the project's primary colour**, and check it before using it.
 
    Find it in the project's own tokens, not in a framework default: a Tailwind
    v4 `@theme` block, `theme.extend.colors` in a Tailwind config, or CSS custom
@@ -280,13 +299,38 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    Report the two contrast figures you measured. "Uses the brand colour" is not
    a check.
 
-5. **The content config is not optional.** `src/content.config.ts` in the
+   **The secondary colour, if `branding.secondary` is set.** It has no slot in
+   either Starlight or Six, so it is only worth applying where it reads as
+   deliberate rather than decorative. Use it for the quiet surfaces and the
+   marks that separate one thing from another, never for body text:
+
+   | Where | Token or selector | Why |
+   | --- | --- | --- |
+   | Table header row | `.sl-markdown-content thead` background | Separates the header from the rows without a second border |
+   | Blockquote bar | `.sl-markdown-content blockquote` left border | The one place a second colour reads as intent |
+   | Active sidebar background | `--sidebar-accent` | The primary already colours the text; this is behind it |
+   | Focus ring on a dark surface | `--ring` fallback | Only where the primary fails contrast |
+
+   **Both colours get the same contrast treatment as the primary.** A secondary
+   used as a background needs the text on it to clear 4.5:1, so compute the
+   text colour rather than assuming white, and light and dark mode need
+   separate values. Report the figures.
+
+   **If the two colours are close in hue and lightness, say so and use one.**
+   Two near-identical accents read as a mistake rather than a system. Better to
+   report "the secondary is within 1.2:1 of the primary, so it is not applied"
+   than to ship a difference nobody can see.
+
+   Write the secondary into the same generated `brand.css`, in its own clearly
+   commented block, so all generated colour stays in one file.
+
+6. **The content config is not optional.** `src/content.config.ts` in the
    template defines the `docs` collection with Starlight's `docsLoader()` and
    `docsSchema()`. Without it the build succeeds, reports
    `The collection "docs" does not exist or is empty`, and produces a 404 page
    and nothing else. It looks like a content problem and is not.
 
-6. **Generate the content.** For each file included by the rules below, write
+7. **Generate the content.** For each file included by the rules below, write
    `docs/starlight/src/content/docs/<name>.md` containing:
 
    ```
@@ -304,12 +348,12 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    Leave generated-region markers in place; they are invisible in the output and
    removing them would tempt someone to edit the copy.
 
-7. **Order the sidebar** so it reads in the order a person needs it, not
+8. **Order the sidebar** so it reads in the order a person needs it, not
    alphabetically. Use `README` 1, `INSTALLATION` 2, `DEVELOPMENT` 3,
    `ARCHITECTURE` 4, `CONFIGURATION` 5, `DEPLOYMENT` 6, `INTEGRATIONS` 7, then
    anything else from 8. `README.md` becomes `index.md` so it is the home page.
 
-8. **Build it** with `npm run build` and report the result. If the build fails,
+9. **Build it** with `npm run build` and report the result. If the build fails,
    report the error rather than deleting anything.
 
 ### What is excluded, in every mode

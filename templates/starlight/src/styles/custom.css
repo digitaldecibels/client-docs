@@ -9,3 +9,11 @@
  * Starlight's own tokens are documented at
  * https://starlight.astro.build/guides/css-and-tailwind/
  */
+
+/* Tables get the same 1rem gap as a paragraph, which is too tight for a
+   bordered block sitting between two blocks of prose. 1.5rem collapses with
+   the 1rem the sibling rule already applies, so the result is 1.5rem above and
+   below rather than the two adding up. */
+.sl-markdown-content table:not(:where(.not-content *)) {
+  margin-block: 1.5rem;
+}

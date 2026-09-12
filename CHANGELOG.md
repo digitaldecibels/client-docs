@@ -5,6 +5,27 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-09-12
+
+### Added
+- A `branding` block in the manifest, hand-edited, holding `primary`,
+  `secondary`, `logo` and `title`. `/docs-site` reads it before it tries to
+  detect anything, so a developer can pin the documentation site's look without
+  editing generated files. Any key left null still falls back to detection, and
+  the report says which values were given and which were guessed.
+- A secondary colour is applied to the table header row and the blockquote bar,
+  the two places a second accent reads as intent rather than decoration in a
+  monochrome theme. Both get the same contrast treatment as the primary, and a
+  secondary too close to the primary is reported and dropped rather than
+  shipped as a difference nobody can see.
+- A `logo` path that does not exist stops the run. The developer meant that
+  file, so falling back silently hides a typo.
+
+### Fixed
+- Tables in the Starlight site had the same 1rem gap as a paragraph, which is
+  too tight for a bordered block between two blocks of prose. Now 1.5rem, which
+  collapses with the existing sibling margin rather than adding to it.
+
 ## [1.3.0] - 2026-09-12
 
 ### Added

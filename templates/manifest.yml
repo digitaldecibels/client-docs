@@ -12,6 +12,24 @@ project:
   name: {{PROJECT_NAME}}
   description: {{ONE_LINE}}
 
+# Hand-edited. /docs-site reads this before it tries to detect anything, so
+# filling it in is how you stop the guessing and pin the documentation site's
+# look. Every key is optional; an empty or missing key falls back to detection.
+branding:
+  # Any CSS colour. Used for links, the active sidebar item and focus rings.
+  # Contrast against the dark theme is checked and the colour is lightened for
+  # dark mode if it fails, so a dark brand navy is a fine thing to put here.
+  primary: null
+  # Used for the quieter surfaces: table header rows, blockquote bars, the
+  # sidebar's active background, code block borders. Leave null to derive a
+  # muted tint of the primary instead.
+  secondary: null
+  # Path, relative to the repository root, to the image shown beside the title.
+  # Prefer a square image: it is drawn at about 24px tall.
+  logo: null
+  # Optional. Overrides the site title, which otherwise comes from project.name.
+  title: null
+
 stack:
   languages: []
   frameworks: []
