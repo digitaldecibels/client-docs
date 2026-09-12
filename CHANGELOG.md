@@ -5,6 +5,32 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-09-12
+
+### Added
+- Starlight components in the generated site, where they earn their place.
+  `<Steps>` for a numbered procedure, `<Tabs syncKey>` for one task with two
+  tool-specific paths, `<FileTree>` for where things live. A page using one is
+  written as `.mdx` with its imports; a page using none stays `.md`.
+- Three HTML-comment markers in the source markdown (`tabs`, `tab`, `filetree`)
+  that the site build turns into components. They are invisible wherever the
+  markdown is read as markdown, so `docs/*.md` stays plain and portable.
+- `syncKey` guidance: a reader picks Lando once and every tab group on every
+  page follows, and the choice persists between pages. One key per real choice.
+- The stated non-candidate: a comparison table showing two tools side by side
+  answers "what is the equivalent?", and tabs would hide half of it. Convert a
+  procedure, leave a comparison alone.
+
+### Fixed
+- Wide tables escaped the content column and gave the page horizontal scroll.
+  The Starlight Six theme ships `display:block; overflow:auto` for this but the
+  rule loses in its own cascade: measured, a table computed to
+  `overflow-x: visible` and drew 693px inside a 644px column. Restated in
+  `custom.css`, which is unlayered and loads last. Page scroll width went from
+  1303px to 1280px on a 1280px viewport.
+- Writing `.mdx` no longer fails on the generated-region markers. MDX has no
+  HTML comments, so `<!-- ... -->` becomes `{/* ... */}` in an `.mdx` page.
+
 ## [1.6.0] - 2026-09-12
 
 ### Added

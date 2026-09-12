@@ -324,13 +324,58 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    Write the secondary into the same generated `brand.css`, in its own clearly
    commented block, so all generated colour stays in one file.
 
-6. **The content config is not optional.** `src/content.config.ts` in the
+6. **Use Starlight's components where they earn their place.** They only work
+   in `.mdx` and `.mdoc`, never in `.md`, so a page that uses one is written as
+   `.mdx` with the imports it needs at the top. A page that uses none stays
+   `.md`. Do not convert every page.
+
+   MDX has no HTML comments. Any `<!-- ... -->` left in the body fails the build
+   with ``Unexpected character `!` ``, so convert them to `{/* ... */}` when
+   writing `.mdx`.
+
+   `docs/*.md` stays plain markdown. Mark the three cases in the source with
+   HTML comments, which are invisible wherever the markdown is read as markdown
+   and degrade to ordinary prose:
+
+   ```markdown
+   <!-- tabs:local-environment -->
+   <!-- tab:Lando -->
+   ...
+   <!-- tab:DDEV -->
+   ...
+   <!-- /tabs -->
+
+   <!-- filetree -->
+   - src/
+     - **index.js** the entry point
+   <!-- /filetree -->
+   ```
+
+   | Component | Use it for | Do not use it for |
+   | --- | --- | --- |
+   | `<Steps>` | A numbered procedure someone follows in order, such as the install steps | A numbered list that is really an enumeration |
+   | `<Tabs syncKey>` | One task with two tool-specific paths: Lando or DDEV, npm or yarn | A comparison, where seeing both at once is the point |
+   | `<FileTree>` | Where things live in the repository, with the parts worth knowing bolded | A complete listing. Show what someone works in |
+
+   **`syncKey` is the reason tabs are worth it.** Every `<Tabs>` sharing a key
+   switches together, across the whole site, and the choice persists between
+   pages. A reader picks Lando once and never sees DDEV again. Use one key per
+   real choice, not one per page.
+
+   **A comparison table is not a candidate.** A table showing the Lando command
+   beside the DDEV command answers "what is the equivalent?", and tabs would
+   hide half of it. Convert a procedure; leave a comparison alone.
+
+   `<Steps>` wraps a standard ordered list and needs no other change. Inside a
+   tab or a step, indent the nested content to that item's continuation indent.
+
+7. **The content config is not optional.** `src/content.config.ts` in the
    template defines the `docs` collection with Starlight's `docsLoader()` and
    `docsSchema()`. Without it the build succeeds, reports
    `The collection "docs" does not exist or is empty`, and produces a 404 page
    and nothing else. It looks like a content problem and is not.
 
-7. **Generate the content.** For each file included by the rules below, write
+8. **Generate the content.** For each file included by the rules below, write
    `docs/starlight/src/content/docs/<name>.md` containing:
 
    ```
@@ -348,12 +393,12 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    Leave generated-region markers in place; they are invisible in the output and
    removing them would tempt someone to edit the copy.
 
-8. **Order the sidebar** so it reads in the order a person needs it, not
+9. **Order the sidebar** so it reads in the order a person needs it, not
    alphabetically. Use `README` 1, `INSTALLATION` 2, `DEVELOPMENT` 3,
    `ARCHITECTURE` 4, `CONFIGURATION` 5, `DEPLOYMENT` 6, `INTEGRATIONS` 7, then
    anything else from 8. `README.md` becomes `index.md` so it is the home page.
 
-9. **Build it** with `npm run build` and report the result. If the build fails,
+10. **Build it** with `npm run build` and report the result. If the build fails,
    report the error rather than deleting anything.
 
 ### What is excluded, in every mode

@@ -10,10 +10,27 @@
  * https://starlight.astro.build/guides/css-and-tailwind/
  */
 
-/* Tables get the same 1rem gap as a paragraph, which is too tight for a
-   bordered block sitting between two blocks of prose. 1.5rem collapses with
-   the 1rem the sibling rule already applies, so the result is 1.5rem above and
-   below rather than the two adding up. */
+/* Tables.
+
+   Spacing: they get the same 1rem gap as a paragraph, which is too tight for a
+   bordered block between two blocks of prose. 1.5rem collapses with the 1rem
+   the sibling rule already applies, so the result is 1.5rem above and below
+   rather than the two adding up.
+
+   Overflow: Six ships `display:block; overflow:auto` for this, but the rule
+   loses in its own cascade. Measured on the Architecture page, a table computed
+   to `overflow-x: visible` and drew 693px wide inside a 644px column, running
+   under the table of contents and giving the whole page 23px of horizontal
+   scroll. Restated here, where it wins, because this file is unlayered and
+   loads last.
+
+   `display:block` is what makes `overflow` apply at all: an element with
+   `display:table` ignores it. The anonymous table box inside still lays the
+   rows out, so the only visible change is that a wide table scrolls inside the
+   column instead of escaping it. */
 .sl-markdown-content table:not(:where(.not-content *)) {
   margin-block: 1.5rem;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
 }
