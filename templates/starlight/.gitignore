@@ -1,0 +1,8 @@
+# Astro and Node build artefacts.
+node_modules/
+dist/
+.astro/
+
+# Generated from ../*.md by `/docs-site --starlight` on every run.
+# The markdown in docs/ is the source. This directory is output.
+src/content/docs/

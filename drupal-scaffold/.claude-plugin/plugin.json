@@ -1,0 +1,17 @@
+{
+  "name": "drupal-scaffold",
+  "description": "Builds Drupal configuration with idempotent PHP scripts instead of by clicking. Ships the portable half of a real Drupal 11 build: image styles, Linkit, media forms, paragraph widgets, CKEditor styles, sitemap, and a paragraph-type template.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Digital Decibels"
+  },
+  "keywords": [
+    "drupal",
+    "drush",
+    "paragraphs",
+    "configuration",
+    "scaffold"
+  ],
+  "commands": "./commands",
+  "skills": "./skills"
+}

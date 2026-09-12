@@ -1,0 +1,21 @@
+{
+  "name": "client-docs",
+  "description": "Creates, audits and maintains client handoff documentation. Detects the project's stack rather than assuming one. Dormant until /docs-init is run.",
+  "version": "1.2.0",
+  "author": {
+    "name": "Digital Decibels"
+  },
+  "keywords": [
+    "documentation",
+    "handoff",
+    "client",
+    "audit",
+    "changelog"
+  ],
+  "commands": "./commands",
+  "agents": [
+    "./agents/documentation-auditor.md"
+  ],
+  "skills": "./skills",
+  "hooks": "./hooks/hooks.json"
+}

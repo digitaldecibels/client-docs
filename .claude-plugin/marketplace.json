@@ -1,0 +1,19 @@
+{
+  "name": "digital-decibels",
+  "owner": {
+    "name": "Digital Decibels"
+  },
+  "description": "Digital Decibels plugins for client project work.",
+  "plugins": [
+    {
+      "name": "client-docs",
+      "source": "./",
+      "description": "Creates, audits and maintains client handoff documentation. Detects the project's stack rather than assuming one. Dormant until /docs-init is run."
+    },
+    {
+      "name": "drupal-scaffold",
+      "source": "./drupal-scaffold",
+      "description": "Builds Drupal configuration with idempotent PHP scripts instead of by clicking. Ships the portable half of a real Drupal 11 build, plus the config export and import traps that make it safe to run."
+    }
+  ]
+}

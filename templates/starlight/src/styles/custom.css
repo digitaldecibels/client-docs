@@ -1,0 +1,11 @@
+/*
+ * Yours to edit. This file is created once and is never overwritten by
+ * /docs-site, so project styling survives a rebuild.
+ *
+ * The brand accent is not here. It lives in brand.css, which is regenerated
+ * from the project's primary colour on every run. Anything you put here wins,
+ * because this file is loaded second.
+ *
+ * Starlight's own tokens are documented at
+ * https://starlight.astro.build/guides/css-and-tailwind/
+ */

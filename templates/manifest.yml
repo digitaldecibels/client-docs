@@ -1,0 +1,66 @@
+# client-docs manifest.
+#
+# Two jobs. It records what is documented and how current each file is, and its
+# existence is what activates the plugin in this repository. Delete it and every
+# command except /docs-init goes quiet.
+#
+# Never put a secret value in here.
+
+generated_by_version: 1.0.0
+
+project:
+  name: {{PROJECT_NAME}}
+  description: {{ONE_LINE}}
+
+stack:
+  languages: []
+  frameworks: []
+  cms: null
+  frontend: []
+  backend: []
+  database: null
+
+development:
+  package_manager: []
+  local_environment: null
+
+deployment:
+  platform: null
+  ci_cd: none detected
+
+# Whether exported configuration can be trusted. See the project-analysis skill.
+config_assessment:
+  directory: null
+  status: absent          # current | stale | absent
+  note: ""
+
+integrations: []
+# - name: Adobe Fonts
+#   purpose: web fonts
+#   evidence: [path/to/file]
+
+documentation:
+  files: []
+  # - path: docs/ARCHITECTURE.md
+  #   last_verified_commit: {{SHA}}
+  #   last_audited: {{DATE}}
+  #   status: current     # current | stale | unverified
+
+  manually_verified: []
+  # - question: Which environment is production?
+  #   answer: ...
+  #   date: {{DATE}}
+
+  requires_confirmation: []
+  # - id: dns
+  #   question: Who controls DNS for the production domain?
+  #   affects: docs/CLIENT-HANDOFF.md
+  #   known: what the repository already shows
+
+# Which files support each handoff section. Internal only: never rendered into
+# the client document. This is what makes a repeat handoff fast.
+handoff_evidence: {}
+
+last_handoff: null
+#   date: {{DATE}}
+#   commit: {{SHA}}

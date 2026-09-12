@@ -1,0 +1,58 @@
+# Optional. Warns on a pull request when a change touches something the
+# documentation describes.
+#
+# It never fails the build. Documentation drift is worth a comment, not a red
+# check, and a docs job that blocks merges gets deleted within a month.
+#
+# Copy to .github/workflows/docs-check.yml.
+
+name: Documentation check
+
+on:
+  pull_request:
+
+jobs:
+  docs-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Look for documentation drift
+        run: |
+          # Dormant unless the project opted in.
+          if [ ! -f docs/.client-docs.yml ]; then
+            echo "client-docs is not set up in this repository. Nothing to check."
+            exit 0
+          fi
+
+          changed=$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD)
+
+          # Same mapping the /docs-update command uses. Keep the two in step.
+          affected=""
+          add() { case "$affected" in *"$1"*) ;; *) affected="$affected $1" ;; esac; }
+
+          while IFS= read -r f; do
+            case "$f" in
+              docs/*|README.md|CHANGELOG.md) continue ;;
+              vendor/*|node_modules/*|web/core/*|*/contrib/*|dist/*) continue ;;
+              composer.json|composer.lock|package.json|*.lock|*.lockb|yarn.lock|pnpm-lock.yaml)
+                add "INSTALLATION" ; add "DEVELOPMENT" ;;
+              .env.example) add "CONFIGURATION" ;;
+              pantheon.yml|netlify.toml|vercel.json|fly.toml|Procfile)
+                add "DEPLOYMENT" ; add "CLIENT-HANDOFF" ;;
+              .github/workflows/*|.gitlab-ci.yml) add "DEPLOYMENT" ;;
+              Dockerfile|docker-compose.yml|.lando.yml|.ddev/*) add "DEVELOPMENT" ;;
+              vite.config.*|tailwind.config.*|webpack.config.*) add "DEVELOPMENT" ;;
+              config/*) add "ARCHITECTURE" ; add "CLIENT-HANDOFF" ;;
+              *modules/custom/*|*themes/custom/*|src/*|app/*) add "ARCHITECTURE" ;;
+            esac
+          done <<< "$changed"
+
+          if [ -z "$affected" ]; then
+            echo "No documentation-relevant changes."
+            exit 0
+          fi
+
+          echo "::warning::These changes may affect:$affected. Run /docs-update locally."
