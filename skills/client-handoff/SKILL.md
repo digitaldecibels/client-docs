@@ -230,22 +230,29 @@ client cares about what changed, not about re-reading forty sections.
 
 ## The deliverable
 
-A handoff is only useful if it is easy to hand over.
+**The document, and nothing else.** `/docs-handoff` writes
+`docs/CLIENT-HANDOFF.md`. It does not build a site unless `--site` is passed,
+in which case it also runs the `/docs-site --handoff` behaviour into
+`docs/handoff-site/`.
 
-On every run, also build the client-facing site into `docs/handoff-site/`,
-using the `/docs-site --handoff` behaviour. That gives a folder the developer
-can zip and email or drop on hosting with no extra step.
+This used to happen on every run, on the reasoning that a handoff gets emailed
+and should be ready to send. The cost was worse than the convenience: on any
+project that serves its documentation another way, it left a second copy of the
+same content in the repository that nothing linked to, nobody rebuilt, and that
+drifted out of date the moment the markdown changed. A stale duplicate is worse
+than a missing convenience.
 
-Say where it is in the summary:
+So the default summary names one artefact:
 
 ```
 docs/CLIENT-HANDOFF.md updated.
-Shareable site: docs/handoff-site/ (open index.html)
 
 Changes since last handoff: 2 (new Mailgun integration, deployment now
 imports config automatically)
 3 items need confirmation before this goes to the client. Run /docs-confirm.
 ```
+
+Add the site's location only when `--site` was passed and the build ran.
 
 ## The document metadata
 

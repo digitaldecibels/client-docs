@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-09-12
+
+### Changed
+- **`/docs-handoff` no longer builds `docs/handoff-site/` on every run.** It
+  writes `docs/CLIENT-HANDOFF.md` and stops. Pass `--site` to also build the
+  shareable site, which is the same thing `/docs-site --handoff` already did on
+  its own.
+
+  The old behaviour assumed every handoff gets emailed, so having a zippable
+  folder ready was worth the extra artefact. On a project that serves its
+  documentation another way, that assumption inverts: the site is a second copy
+  of the same content that nothing links to, nobody rebuilds, and that goes
+  stale the moment the markdown changes. A stale duplicate costs more than a
+  missing convenience.
+
 ## [1.4.0] - 2026-09-12
 
 ### Added

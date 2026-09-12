@@ -1,6 +1,6 @@
 ---
 description: Generate or update the client-facing handoff document and its shareable site
-argument-hint: "[--sections <list>]"
+argument-hint: "[--sections <list>] [--site]"
 ---
 
 Produce `docs/CLIENT-HANDOFF.md` for someone who did not build this.
@@ -40,14 +40,19 @@ changed, say exactly that in one sentence and do not pad it.
 
 - Never print a secret value. Name the variable and its purpose.
 - Never invent a URL, credential, procedure or piece of infrastructure.
-- Build the shareable site into `docs/handoff-site/` on every run, using the
-  `/docs-site --handoff` behaviour, so the developer has something they can zip
-  and send without a second command. This stays self-contained even on a project
-  using `--starlight` for its developer documentation: a handoff gets emailed,
-  and a Starlight build needs a web root.
+- **Write the document. Do not build a site unless asked.** `/docs-handoff`
+  produces `docs/CLIENT-HANDOFF.md` and nothing else. Passing `--site` also
+  builds `docs/handoff-site/` using the `/docs-site --handoff` behaviour, which
+  is the same thing that command does on its own.
+
+  It used to build the site on every run. That is wrong on any project serving
+  its documentation another way, because it leaves a second, stale copy of the
+  content sitting in the repository that nothing links to and nobody rebuilds.
+  One command, one artefact.
 - Never include the conflict log or any internal note in client-facing output.
 
 ## Report
 
-Where the document and the site are, how many changes since last time, and how
-many items need confirmation before it can go to the client.
+Where the document is, how many changes since last time, and how many items
+need confirmation before it can go to the client. Name the site's location only
+when `--site` was passed and it was actually built.
