@@ -5,6 +5,30 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-09-12
+
+### Added
+- `docs/MODULES.md` and `docs/CONTENT-MODEL.md` join the generated set, with
+  templates for each. The modules page lists every contributed and custom
+  package with a plain-language line saying what it does for this site, grouped
+  by what a reader would recognise, flagging the development-only ones and
+  those installed but switched off. The content model page lists each component
+  an editor builds pages from and the fields they fill in.
+- Concision rules in `documentation-rules`: one sentence per idea, no preamble,
+  a table wherever the content has a repeating shape, and no section that only
+  says a thing does not apply. Traps are the stated exception, because the cost
+  of one being missed outweighs the words.
+- REQUIRES CONFIRMATION renders as a Starlight caution aside rather than a bold
+  run of text in a paragraph, so it is visible rather than skimmed past. Covers
+  the two cases that cannot be an aside: a table cell, and a list item.
+
+### Fixed
+- The installed-modules and content-components sections were defined in
+  `client-handoff`, so they only ever reached `CLIENT-HANDOFF.md`. A project
+  serving developer documentation any other way never saw them. Both now live
+  in `project-analysis`, which the documentation commands load, and the handoff
+  skill points at them rather than holding a second copy.
+
 ## [1.5.0] - 2026-09-12
 
 ### Changed

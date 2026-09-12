@@ -68,6 +68,7 @@ Proposed documentation:
   docs/ARCHITECTURE.md      docs/INSTALLATION.md
   docs/DEVELOPMENT.md       docs/DEPLOYMENT.md
   docs/CONFIGURATION.md     docs/INTEGRATIONS.md
+  docs/MODULES.md           docs/CONTENT-MODEL.md
   README.md                 (generated section only, existing content kept)
 
 Generate these? (all / choose / cancel)

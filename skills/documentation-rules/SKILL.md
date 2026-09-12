@@ -163,6 +163,58 @@ Other habits worth keeping:
 - Say what a reader should do, not what they could consider doing.
 - Cut every sentence that would survive being deleted.
 
+## Say it once, in as few words as carry the meaning
+
+Generated documentation is looked things up in, not read through. Length costs
+the reader directly.
+
+- **One sentence per idea.** If a paragraph explains the same thing twice in
+  different words, delete the second.
+- **No preamble.** Start with the fact. "This project uses Pantheon" beats
+  "In order to understand how this project is deployed, it is worth noting
+  that it uses Pantheon".
+- **A table beats a paragraph** whenever the content is a list of things with
+  the same shape. Three facts about each of six modules is a table.
+- **Cut the reassurance.** "It is worth noting", "as you might expect",
+  "simply", "of course", "please note" carry nothing.
+- **Do not restate a heading in its first sentence.** The heading said it.
+- **No section that only says a thing does not apply.** Leave it out.
+
+The exception is a trap: something that has cost someone an hour, or will.
+Explain that fully, including why, because the cost of it being missed is
+higher than the cost of the words.
+
+## Make REQUIRES CONFIRMATION visible
+
+A confirmation marker buried in a paragraph gets skimmed past, which defeats
+its purpose. Where the output is rendered by a site that supports callouts,
+use one.
+
+For Starlight, that is a caution aside:
+
+```
+:::caution[Requires confirmation]
+Which branch Dev builds from. The remote has both a master and a main branch
+and nothing in the repository says which is authoritative.
+:::
+```
+
+Three rules:
+
+1. **The body starts with the unknown**, as a normal sentence. The title
+   already says it needs confirming, so do not repeat the marker inside.
+2. **A table cell cannot hold an aside.** Leave `**REQUIRES CONFIRMATION**` as
+   bold text in the cell and, if the reason matters, put one aside under the
+   table covering the lot.
+3. **Inside a list item, indent the aside** to the item's continuation indent.
+   It renders correctly. A bullet that is entirely a confirmation marker is
+   better as an aside in its own right, with the bullet dropped.
+
+Plain markdown has no aside syntax, so `:::` shows literally when the file is
+read on disk or on a code host. That is an accepted cost where the site is the
+destination. If a project reads its markdown mainly on a code host, use the
+blockquote alert that host supports instead, and say which you chose.
+
 ## Client-facing against developer-facing
 
 `CLIENT-HANDOFF.md` and anything in `docs/handoff-site/` is read by someone who

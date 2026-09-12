@@ -179,6 +179,105 @@ required flags, the field storage for what it holds, and the form display for
 the order. **The form display is what decides the order an editor sees**, so a
 list built from the field files alone will be in the wrong order.
 
+## Two sections worth their length
+
+Most of a generated document should be short. These two are references people
+look things up in repeatedly, so they earn their size. They belong in the
+developer documentation (`docs/MODULES.md` and `docs/CONTENT-MODEL.md`) and go
+into a client handoff only when the client is inheriting the site to maintain.
+
+## Installed modules or packages
+
+An inventory section, and the only one in the document that is allowed to be
+long. It answers a question clients and inheriting developers both ask: what is
+this thing made of, and what is each piece for.
+
+**One line each, in plain language, saying what it does for this site.** Not
+what the package does in general. "Linkit" is not an answer; "lets an editor
+search for a page by title instead of pasting a URL" is.
+
+Get the list from the dependency manifest and the enabled list, never by
+reading the module's source:
+
+| Framework | List from | Enabled state from |
+| --- | --- | --- |
+| Drupal | `composer.json` | `core.extension.yml` |
+| Node | `package.json` `dependencies` | not applicable |
+| Laravel | `composer.json` | `config/app.php` providers |
+
+For the one-line description, the package's own manifest is the cheapest honest
+source: a Drupal module's `<name>.info.yml` `description`, or the `description`
+in a Node package's `package.json`. **This is a deliberate exception to the
+scan budget in `project-analysis`**, which otherwise forbids opening anything
+under `contrib/` or `node_modules/`. Read that one key from that one file.
+Nothing else, and never the module's PHP or JavaScript.
+
+Those descriptions are written for developers, so rewrite each one for the
+reader. If a module's own description does not survive rewriting into something
+a client would understand, say what it does here instead, and only from
+evidence.
+
+Keeping it readable:
+
+- **Group by what the client would recognise**, not alphabetically. Suggested
+  groups: editing, media, search engine optimisation, security, performance,
+  development only.
+- **Say which ones are development only and not enabled on the live site.**
+  This matters: a client reading `devel` in a list will ask about it. Prove it
+  from the enabled list rather than assuming.
+- **Drupal core modules are not worth listing individually.** One sentence
+  saying core supplies the basics covers it. List contributed and custom.
+- **Custom modules get more than one line**, because nobody else can look them
+  up. Say what it does and what breaks without it.
+- **Note any module carrying a patch**, from the `patches` block in
+  `composer.json`, because a patch is a maintenance obligation the client is
+  taking on.
+
+If the list runs past about forty rows, keep the groups and say plainly at the
+top how many there are, rather than trimming silently.
+
+## Content components
+
+For a site built from components (Drupal paragraph types, a block library, a
+component library), list each component and the fields an editor fills in.
+
+This is the closest thing to a manual for the people who will use the site
+daily, and it is the section most likely to be read more than once.
+
+Per component:
+
+| What | From |
+| --- | --- |
+| Its name as an editor sees it | the type's label |
+| What it is for, one line | the type's description |
+| Each field, its label, and whether it is required | the field config |
+| What kind of thing each field takes | the field type, in plain words |
+
+Say the field type the way an editor experiences it. "Entity reference to
+media" is the machine's name for it; "an image chosen from the media library"
+is what they see.
+
+Where to read it, from exported configuration rather than the database:
+
+| Drupal | File |
+| --- | --- |
+| Component name and description | `paragraphs.paragraphs_type.*.yml` |
+| Which fields it has, and their labels and required flags | `field.field.paragraph.<type>.*.yml` |
+| What each field stores | `field.storage.paragraph.*.yml` |
+| The order an editor sees them in | `core.entity_form_display.paragraph.<type>.default.yml` |
+
+**Field order is the form display order, not the order the field files appear
+in.** Read the form display's `content` block and sort by its `weight`, or the
+list will not match what an editor sees, which makes it worse than no list.
+
+Two things to leave out: fields hidden on the form display, since an editor
+never meets them, and the machine names, unless the project's own conventions
+make them useful to an inheriting developer.
+
+If the project generates this structure from a script rather than by hand, that
+script is better evidence than the exported configuration, because it usually
+carries the descriptions too. Record it as the evidence in the manifest.
+
 ## Recording what you found
 
 Write it to the manifest at `docs/.client-docs.yml`, which is both the record
