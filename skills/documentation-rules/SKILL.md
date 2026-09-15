@@ -8,6 +8,41 @@ description: The rules every client-docs command follows. Evidence hierarchy, wh
 These apply to every client-docs command. The other skills describe *what* to
 do; this describes what is and is not allowed while doing it.
 
+## The project's own settings and rules come first
+
+The plugin's behaviour is a set of defaults. A project changes them with two
+optional files beside the manifest, and every command reads both before it
+writes anything:
+
+| File | Holds | Written by |
+| --- | --- | --- |
+| `docs/client-docs.config.yml` | Structured choices: documents to skip, tab groups and their order, sidebar order, the Open questions page, branding | The developer. `/docs-init` creates it once; nothing else writes it |
+| `docs/client-docs.rules.md` | Plain-sentence rules a setting cannot express: what the client calls things, what not to document, who reads which page | The developer, only |
+
+Precedence, highest first:
+
+1. **The floor, which nothing overrides.** Never invent a fact the repository
+   does not show. Never write a secret value. Never overwrite text outside
+   generated markers. A rule that asks for any of these is reported as
+   ignored, with the reason, and the rest of the file still applies.
+2. **`client-docs.rules.md`.** Where a rule there contradicts a rule in these
+   skills, the project's rule wins for that project.
+3. **`client-docs.config.yml`.** Merged key by key over the plugin's defaults.
+   A key that is absent uses the default shown in the plugin's
+   `templates/client-docs.config.yml`.
+4. **The plugin's skills and templates.**
+
+Neither file existing is normal and means plugin defaults throughout. Say once
+in a report which files were read, so it is clear why a project's
+documentation differs from another's.
+
+`documents.skip` means skip everywhere: not proposed by `/docs-init`, not
+updated, not audited, not counted as stale, not published. If a skipped
+document already exists, leave it alone and say so rather than deleting it.
+
+**An unknown key is reported, not guessed at.** A misspelt setting that
+silently does nothing is the failure this whole arrangement exists to avoid.
+
 ## Documentation describes the real implementation
 
 **Never invent** credentials, URLs, API keys, deployment procedures,
@@ -189,11 +224,19 @@ higher than the cost of the words.
 When a project has more than one local environment committed, such as DDEV and
 Lando, a reader uses one of them. Never make them read past the other.
 
+The `tabs.local-environment` settings decide the details for a project: `order`
+is the tab order, the first being the one a new reader sees (default DDEV, then
+Lando), `hide` lists tools the project does not document, and `enabled: false`
+turns the tabs into labelled sections. The same shape works for any other real
+choice a project has, such as `tabs.package-manager` for npm and yarn: add the
+key and use its name in the markers.
+
 - **Every command that differs by tool goes in tab markers**, one tool per tab,
-  with DDEV first. That covers the quick start in the README, each installation
-  step, verification, troubleshooting, the commands reference and any workflow
-  section. The markers are `<!-- tabs:local-environment -->`,
-  `<!-- tab:DDEV -->`, `<!-- tab:Lando -->` and `<!-- /tabs -->`.
+  in the order the settings give. That covers the quick start in the README,
+  each installation step, verification, troubleshooting, the commands
+  reference and any workflow section. The markers are
+  `<!-- tabs:local-environment -->`, `<!-- tab:DDEV -->`, `<!-- tab:Lando -->`
+  and `<!-- /tabs -->`. A tool in `hide` gets no tab and is not documented.
 - **Never write `# or` between two tools' commands**, never "run X, or Y", and
   never a table with a column per tool. A reference table becomes one table per
   tab, with the same rows in the same order.

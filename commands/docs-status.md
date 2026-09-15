@@ -5,6 +5,8 @@ description: Show which documentation is current and which is stale, without cha
 A read-only health check. Fast, and safe to run whenever.
 
 Load `documentation-maintenance` for the manifest schema and the change mapping.
+Documents in `documents.skip` in `docs/client-docs.config.yml` are not
+reported, stale or otherwise.
 
 ## Dormant check
 

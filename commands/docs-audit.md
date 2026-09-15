@@ -15,7 +15,8 @@ No `docs/.client-docs.yml` means the project is not initialised. Say so, suggest
 Delegate to the `documentation-auditor` agent. It is read-only and it keeps the
 repository analysis out of this conversation's context.
 
-Give it the manifest path, the scope (all documentation, or the single file
+Give it the manifest path, the paths of `docs/client-docs.config.yml` and
+`docs/client-docs.rules.md` if they exist, the scope (all documentation, or the single file
 named in the argument), and tell it to load `documentation-audit`,
 `documentation-rules` and `project-analysis`.
 

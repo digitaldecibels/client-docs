@@ -7,7 +7,27 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-09-15
+
 ### Added
+- Per-project settings in `docs/client-docs.config.yml`, hand-edited and never
+  written by the plugin: documents to skip, tab groups with their order and
+  hidden tools, sidebar order, site exclusions, page descriptions, which
+  components are used, the Open questions page, and branding. Every key is
+  optional and defaults to the plugin's current behaviour, shown in
+  `templates/client-docs.config.yml`. Unknown keys are reported.
+- Per-project rules in `docs/client-docs.rules.md`, plain sentences every
+  command reads before writing. A project's rule wins over the plugin's, apart
+  from the floor: never invent a fact, never write a secret, never overwrite
+  text outside generated markers.
+- `scripts/build-starlight.mjs`, which generates the Starlight pages from
+  `docs/*.md`, the settings and the manifest. Conversion had been done by hand
+  from instructions, so two sessions could produce different pages; the script
+  gives the same output every time. It needs no install, using the `js-yaml`
+  Astro already provides, and `--out` writes elsewhere for comparison.
+- `/docs-init` creates both files, filling only what the repository shows.
+- `<!-- steps -->` markers for a numbered procedure, alongside the existing
+  `## Steps` heading convention.
 - An Open questions page in the Starlight site, generated from the manifest on
   every `/docs-site` run. Every `requires_confirmation` entry is a card grouped
   under the page it affects, with what is already known and a link to that
@@ -19,6 +39,14 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
   four by position and make equal questions look like different severities.
 
 ### Changed
+- `branding` moves from the manifest to `docs/client-docs.config.yml`. An older
+  manifest is migrated on the next command, which says so once.
+- Tab order, hidden tools and the Open questions page are settings rather than
+  fixed rules. The defaults are unchanged.
+- The default sidebar order includes CONTENT-MODEL, MODULES and CHANGELOG,
+  which the plugin has generated since 1.6.0 but the order never listed.
+- Page descriptions come only from a page's opening paragraph, before its
+  first heading. A sentence from inside a section described the section.
 - DDEV and Lando are always split into their own tabs, and DDEV is written
   first so it is the tab a new reader sees. Starlight has no default-tab
   setting; the first `<TabItem>` is selected until the reader picks another,

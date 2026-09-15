@@ -14,7 +14,8 @@ suggest `/docs-init`, and stop. Do not analyse, do not generate.
 
 ## Procedure
 
-1. Read the manifest. For each documented file, the range is
+1. Read the manifest, and the project's settings and rules if they exist.
+   Leave out every document in `documents.skip`. For each documented file, the range is
    `last_verified_commit..HEAD`. `--since <commit>` overrides the starting
    point for every file.
 2. List changed paths across that range with `git diff --name-only`.

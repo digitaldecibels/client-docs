@@ -1,7 +1,7 @@
 {
   "name": "client-docs",
   "description": "Creates, audits and maintains client handoff documentation. Detects the project's stack rather than assuming one. Dormant until /docs-init is run.",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "author": {
     "name": "Digital Decibels"
   },

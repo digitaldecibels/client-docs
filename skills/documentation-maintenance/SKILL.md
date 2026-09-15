@@ -80,6 +80,13 @@ last_handoff:
 **Never store secrets in it.** Record that a variable is configured and where,
 not its value.
 
+**The manifest is the plugin's record, not the developer's settings.** Choices
+a developer makes about this project live in `docs/client-docs.config.yml` and
+`docs/client-docs.rules.md`, which the plugin reads and never writes. See the
+first section of documentation-rules. In particular, `documents.skip` removes a
+document from the change mapping below: a change that maps only to a skipped
+document affects nothing.
+
 ## last_verified_commit is the whole mechanism
 
 Each documented file records the commit SHA at which it was last confirmed
@@ -220,6 +227,13 @@ repositories written at different times.
   version, carry on.
 - **Breaking change** (a key renamed, a structure changed): migrate, and tell
   the developer plainly what changed and what to check.
+
+**`branding` moved out of the manifest in 1.8.0.** If a manifest still has a
+`branding` block, copy its values into `branding` in
+`docs/client-docs.config.yml`, creating that file from the template if it does
+not exist, then remove the block from the manifest. Tell the developer once,
+in one line, where their settings now live. If both places have a value and
+they differ, keep the settings file's and say so.
 
 Never fail because a manifest is old. An old manifest still knows more than no
 manifest.

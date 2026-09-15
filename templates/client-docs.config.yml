@@ -1,0 +1,63 @@
+# client-docs settings for this project.
+#
+# Hand-edited. The plugin reads this file and never writes it, apart from
+# /docs-init creating it once. Every key is optional: delete any you do not
+# need, and the value shown here is what the plugin uses instead.
+#
+# Anything a setting cannot express goes in docs/client-docs.rules.md, as
+# plain sentences.
+
+documents:
+  # Documents the plugin never generates, maintains, audits or publishes in
+  # this project. Names without .md, for example [CONTENT-MODEL, INTEGRATIONS].
+  skip: []
+
+tabs:
+  # Commands that differ by tool are written in tab markers in docs/*.md and
+  # rendered as tabs on the Starlight site. One group per real choice.
+  local-environment:
+    # false writes each tool's steps one after another, under a bold label.
+    enabled: true
+    # The first label is the tab a new reader sees. Labels not listed keep
+    # their order from the source, after these.
+    order: [DDEV, Lando]
+    # Tools this project does not use. Their tabs are dropped, and a group left
+    # with one tool is written as plain steps.
+    hide: []
+
+site:
+  # Sidebar order. Documents not listed follow, alphabetically.
+  order: [README, INSTALLATION, DEVELOPMENT, ARCHITECTURE, CONTENT-MODEL, MODULES, CONFIGURATION, DEPLOYMENT, INTEGRATIONS, CHANGELOG]
+  # Written to docs/ but not published on the site. CLIENT-HANDOFF is never
+  # published, whatever this says.
+  exclude: []
+  # first-sentence | none. A page description shows under its title and in
+  # search results. The home page always uses project.description.
+  descriptions: first-sentence
+  components:
+    tabs: true
+    steps: true
+    filetree: true
+  open_questions:
+    # A page listing every open REQUIRES CONFIRMATION item, one card each.
+    enabled: true
+    title: Open questions
+    # first | last | a sidebar order number
+    position: last
+    # Shows the open count beside the sidebar link.
+    badge: true
+    # Any Starlight icon name.
+    icon: warning
+
+# The site's look, read by /docs-site when it writes src/styles/brand.css.
+# Anything null is detected from the project instead. Styling beyond these
+# belongs in docs/starlight/src/styles/custom.css, which is yours.
+branding:
+  # Any CSS colour. Contrast is checked and adjusted for dark mode.
+  primary: null
+  # Quiet surfaces: table header rows, blockquote bars.
+  secondary: null
+  # Path from the repository root. Prefer a square image.
+  logo: null
+  # Overrides the site title, which otherwise comes from project.name.
+  title: null

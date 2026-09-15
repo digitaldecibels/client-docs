@@ -77,6 +77,38 @@ open starts growing documentation you did not ask for.
 | `/docs-changelog` | Builds CHANGELOG.md from git history | yes |
 | `/docs-site` | Static browsable site from the markdown. `--starlight` builds an Astro Starlight site instead | yes |
 
+## Making it fit a project
+
+The plugin's behaviour is a set of defaults. Each project can change them with
+two optional files next to the manifest, which the plugin reads and never
+writes. `/docs-init` creates both.
+
+**`docs/client-docs.config.yml`** holds the structured choices:
+
+| Setting | What it changes |
+| --- | --- |
+| `documents.skip` | Documents never generated, maintained, audited or published here |
+| `tabs.local-environment` | Tab order (the first is what a new reader sees), tools to `hide`, or no tabs at all |
+| `site.order`, `site.exclude` | Sidebar order, and documents kept off the site |
+| `site.descriptions` | Whether pages carry a description under the title |
+| `site.components` | Tabs, steps and file trees on or off |
+| `site.open_questions` | The Open questions page: on or off, title, position, count badge, icon |
+| `branding` | Primary and secondary colour, logo, site title |
+
+Every key is optional. The template in `templates/client-docs.config.yml`
+shows each default, and a misspelt key is reported rather than silently
+ignored. Tab groups are not limited to local environments: add
+`tabs.package-manager` and use that name in the markers.
+
+**`docs/client-docs.rules.md`** holds anything a setting cannot say, in plain
+sentences: what the client calls the site, what not to document, which pages
+the client reads. Where a rule there disagrees with the plugin's own rules, the
+project wins. What it cannot change: the plugin still never invents a fact,
+never writes a secret, and never touches text outside its generated markers.
+
+Styling beyond the brand colours goes in `docs/starlight/src/styles/custom.css`,
+which is also the project's and never overwritten.
+
 ## How it stays cheap to run
 
 Each documented file records the commit it was last verified at. Staleness is
@@ -107,7 +139,9 @@ three weeks ago that renamed an environment variable.
 
 | Path | What it is |
 | --- | --- |
-| `docs/.client-docs.yml` | The manifest, and the opt-in switch. Commit it. |
+| `docs/.client-docs.yml` | The manifest, and the opt-in switch. Written by the plugin. Commit it. |
+| `docs/client-docs.config.yml` | This project's settings. Yours; the plugin only reads it. Commit it. |
+| `docs/client-docs.rules.md` | This project's own documentation rules. Yours. Commit it. |
 | `docs/.client-docs-conflicts.md` | Internal conflict log. Never shown to a client. |
 | `docs/*.md` | The documentation |
 | `docs/site/` | Developer site, from `/docs-site` |

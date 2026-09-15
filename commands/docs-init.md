@@ -71,8 +71,15 @@ Proposed documentation:
   docs/MODULES.md           docs/CONTENT-MODEL.md
   README.md                 (generated section only, existing content kept)
 
+Project settings:
+  docs/client-docs.config.yml   defaults, local environments: DDEV, Lando
+  docs/client-docs.rules.md     empty, for this project's own rules
+
 Generate these? (all / choose / cancel)
 ```
+
+Documents left out under `choose` are written into `documents.skip`, so later
+commands leave them out too.
 
 With `--minimal`, propose only README, INSTALLATION and DEVELOPMENT.
 
@@ -92,14 +99,32 @@ Every generated block is wrapped:
 **An existing README is never replaced.** Add a generated section to it, or
 leave it alone and put the detail in `docs/`. Ask if it is not obvious.
 
-## 6. Write the manifest
+## 6. Write the project's settings
+
+Copy `${CLAUDE_PLUGIN_ROOT}/templates/client-docs.config.yml` to
+`docs/client-docs.config.yml` and change only what this project already shows:
+
+- `documents.skip`: anything the developer left out when choosing.
+- `tabs.local-environment.hide`: a tool the plugin lists that has no config in
+  the repository. A project with only `.lando.yml` hides DDEV, so no tab group
+  is written for a tool nobody uses.
+- `branding`: leave null. `/docs-site` detects it and reports what it found,
+  and the developer pins it here if the guess is wrong.
+
+Copy `${CLAUDE_PLUGIN_ROOT}/templates/client-docs.rules.md` to
+`docs/client-docs.rules.md` unchanged. Its rules section starts empty; the
+rules are the developer's to write, not inferred.
+
+If either file already exists, leave it alone. It is the developer's.
+
+## 7. Write the manifest
 
 `docs/.client-docs.yml`, using the schema in `documentation-maintenance`. Set
 `last_verified_commit` on every file to the current HEAD, and record
 `generated_by_version`. This file is what activates the plugin, so it is written
 last, after the documentation exists.
 
-## 7. Report
+## 8. Report
 
 What was created, how many items need confirmation, and one next step:
 

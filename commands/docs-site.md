@@ -58,6 +58,8 @@ Never include the plugin's own working files in any build, in either mode:
 ```
 docs/.client-docs.yml            the manifest
 docs/.client-docs-conflicts.md   the conflict log
+docs/client-docs.config.yml      the project's settings
+docs/client-docs.rules.md        the project's rules
 docs/site/, docs/handoff-site/   previous builds
 ```
 
@@ -166,9 +168,12 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    primary colour has changed since last time, say so in the report rather than
    changing it silently.
 
-3. **Read `branding` in the manifest first.** Any key set there is the answer,
-   and detection is skipped for that key. It exists so a developer can stop the
-   guessing without editing generated files:
+3. **Read the project's settings and rules first.** `docs/client-docs.config.yml`
+   and `docs/client-docs.rules.md`, as described in "The project's own settings
+   and rules come first" in the documentation-rules skill. Both are optional.
+
+   `branding` in the settings is the answer for any key set there, and
+   detection is skipped for that key:
 
    ```yaml
    branding:
@@ -179,8 +184,9 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    ```
 
    Missing, `null` or empty means detect it as described below. Report which
-   values came from the manifest and which were detected, so it is obvious
-   which ones are a guess.
+   values came from the settings and which were detected, so it is obvious
+   which ones are a guess. An older project may still carry `branding` in the
+   manifest; see "Manifest migration" in documentation-maintenance.
 
    A `logo` path that does not exist is an error worth stopping for, not
    something to silently fall back from. The developer meant that file.
@@ -362,25 +368,24 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    pages. A reader picks DDEV once and never sees Lando again. Use one key per
    real choice, not one per page.
 
-   **DDEV and Lando always get their own tabs, and DDEV comes first.** When a
-   procedure has a DDEV path and a Lando path, split them into a
-   `local-environment` group rather than writing both into one block. Starlight
-   has no prop for the default tab: the first `<TabItem>` in the markup is the
-   one selected, until a reader picks another and their browser remembers it
-   under the `syncKey`. So order is the whole mechanism. Write
-   `<TabItem label="DDEV">` first and `<TabItem label="Lando">` second, in every
-   group on every page, and keep the labels spelled exactly that way, because
-   syncing matches on the label text. A project configured for only one of the
-   two gets no tab group: document the tool it has, as plain steps.
+   **Tab order is a setting, and order is the whole mechanism.** Starlight has
+   no prop for the default tab: the first `<TabItem>` in the markup is the one
+   selected, until a reader picks another and their browser remembers it under
+   the `syncKey`. `tabs.<group>.order` in the settings is therefore how a
+   project chooses its default, and `hide` how it drops a tool it does not
+   use. Labels must be spelled identically everywhere, because syncing matches
+   on the label text. A group left with one tab is written as plain content.
 
    **A command table with a column per tool is split, not kept.** A reader
-   runs one tool, so a table with a DDEV column beside a Lando column becomes
-   one table per tab, same rows in the same order. The source markdown should
-   already be written that way (see "One tab per local environment" in the
-   documentation-rules skill); if it is not, fix the source rather than only
-   the site. What stays a table is an explanation of how the tools differ,
-   such as where each gets its database credentials, because comparing is its
-   whole purpose.
+   runs one tool, so a table with a column per tool becomes one table per tab,
+   same rows in the same order. The source markdown should already be written
+   that way (see "One tab per local environment" in the documentation-rules
+   skill); if it is not, fix the source rather than only the site. What stays
+   a table is an explanation of how the tools differ, such as where each gets
+   its database credentials, because comparing is its whole purpose.
+
+   A numbered procedure can be marked `<!-- steps -->` and `<!-- /steps -->`.
+   Without the markers, the ordered list under a `## Steps` heading is used.
 
    `<Steps>` wraps a standard ordered list and needs no other change. Inside a
    tab or a step, indent the nested content to that item's continuation indent.
@@ -391,75 +396,60 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    `The collection "docs" does not exist or is empty`, and produces a 404 page
    and nothing else. It looks like a content problem and is not.
 
-8. **Generate the content.** For each file included by the rules below, write
-   `docs/starlight/src/content/docs/<name>.md` containing:
+8. **Generate the content with the plugin's script.** It does the conversion
+   the same way on every run and in every session, which conversion by hand
+   did not:
 
-   ```
-   ---
-   title: <the file's h1, verbatim>
-   description: <the first sentence of the first paragraph, if there is one>
-   sidebar:
-     order: <see ordering below>
-   ---
+   ```bash
+   node ${CLAUDE_PLUGIN_ROOT}/scripts/build-starlight.mjs <repository root>
    ```
 
-   Then the body, with two changes: **remove the h1**, because Starlight renders
-   the title itself and leaving it gives the page two, and **remove the
-   provenance comment**, because Starlight shows a last-updated date of its own.
-   Leave generated-region markers in place; they are invisible in the output and
-   removing them would tempt someone to edit the copy.
+   Use the same Node chosen in step 1. It needs no install of its own: it reads
+   YAML with the `js-yaml` that Astro already puts in `docs/starlight/`.
 
-9. **Order the sidebar** so it reads in the order a person needs it, not
-   alphabetically. Use `README` 1, `INSTALLATION` 2, `DEVELOPMENT` 3,
-   `ARCHITECTURE` 4, `CONFIGURATION` 5, `DEPLOYMENT` 6, `INTEGRATIONS` 7, then
-   anything else from 8. `README.md` becomes `index.md` so it is the home page.
+   It reads the settings file and the manifest, and writes every page into
+   `src/content/docs/`, deleting any `.md` or `.mdx` there that it did not
+   produce, so a document dropped from the settings leaves the site. For each
+   page it:
 
-10. **Generate the Open questions page**, `src/content/docs/open-questions.mdx`,
-   from the manifest. It is the list everyone working on the project can see
-   and work down, and it is built from data rather than copied from a doc, so
-   it is written fresh on every run. It lists **open items only**: an answered
-   question leaves the page, and its answer lives on the page it affected.
+   - takes the title from the file's h1 and removes the h1, because Starlight
+     renders the title itself and leaving it gives the page two
+   - removes the provenance comment, because Starlight shows its own date
+   - adds a description per `site.descriptions`; the home page always uses
+     `project.description`
+   - sets the sidebar order from `site.order`, with unlisted pages after it
+   - turns tab, steps and filetree markers into components, honouring the
+     `tabs` and `site.components` settings, and writes `.mdx` only when a
+     component is used
+   - turns remaining HTML comments into MDX comments in an `.mdx` page
 
-   ```
-   ---
-   title: Open questions
-   description: What the repository cannot settle on its own, as a list to work through.
-   sidebar:
-     order: 100
-     badge:
-       text: "<number open>"
-       variant: caution        # success when nothing is open
-   ---
+   It prints unknown settings keys. Report them; do not guess what was meant.
 
-   import { Card } from '@astrojs/starlight/components';
-   ```
+   To see what a change to the settings would do before writing anything,
+   pass `--out <scratch dir>` and diff that against `src/content/docs/`.
 
-   The body is a one-line count ("14 open") and a sentence saying
-   `/docs-confirm` is how an item gets answered. Then every entry in
-   `requires_confirmation`, grouped under a `##` heading per affected page in
-   sidebar order, each in its own card. No checkboxes: this is a list of
-   questions, not a form, and a box nobody can tick invites clicking.
+   Do not edit its output by hand to change how a page renders. Change the
+   settings, the markers in `docs/*.md`, or the script, then run it again.
 
-   ```mdx
-   <Card title="<question>" icon="warning">
+9. **The sidebar**, from `site.order`. The plugin default reads in the order a
+   person needs it: README, INSTALLATION, DEVELOPMENT, ARCHITECTURE,
+   CONTENT-MODEL, MODULES, CONFIGURATION, DEPLOYMENT, INTEGRATIONS, CHANGELOG.
+   `README.md` becomes `index` so it is the home page.
 
-   <known>
+10. **The Open questions page** is written by the same script when
+   `site.open_questions.enabled` is true: `open-questions.mdx`, listing every
+   entry in the manifest's `requires_confirmation` and nothing else. It is the
+   list everyone working on the project can see and work down. Answered
+   questions leave it; their answers live on the page they affected.
 
-   Affects [<page title>](../<page slug>/).
+   Each question is a card under a heading for the page it affects, with what
+   is already known and a link to that page. No checkboxes: this is a list of
+   questions, not a form, and a box nobody can tick invites clicking. The
+   title, sidebar position, count badge and icon are settings.
 
-   </Card>
-   ```
-
-   Card titles are rendered as HTML, so escape `&`, `<`, `>` and `"` in the
-   question and then turn backticked code into `<code>`. In the body, escape
-   `{`, `}` and `<`, which MDX would otherwise parse as JSX. Links are relative
-   (`../slug/`) so they survive any `base`. The page never shows an item that
-   is not in the manifest, which is why the consistency check in the
-   documentation-rules skill requires every visible marker to have an entry.
-
-   The sidebar badge is the reason it earns a place in the navigation: the
-   count is visible from every page. `order: 100` puts it last so it does not
-   push the setup pages down.
+   Because the page shows only what the manifest holds, the consistency check
+   in documentation-rules requires every visible REQUIRES CONFIRMATION marker
+   to have a manifest entry.
 
    `custom.css` in the template gives every card the same amber. Starlight
    otherwise colours card icons by position, orange, purple, green and red in
@@ -477,6 +467,8 @@ into Starlight:
 ```
 docs/.client-docs.yml            the manifest
 docs/.client-docs-conflicts.md   the conflict log
+docs/client-docs.config.yml      the project's settings
+docs/client-docs.rules.md        the project's rules
 docs/CLIENT-HANDOFF.md           client-facing, and it stays self-contained
 docs/site/, docs/handoff-site/   previous builds
 docs/starlight/                  itself
