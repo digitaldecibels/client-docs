@@ -339,9 +339,9 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
 
    ```markdown
    <!-- tabs:local-environment -->
-   <!-- tab:Lando -->
-   ...
    <!-- tab:DDEV -->
+   ...
+   <!-- tab:Lando -->
    ...
    <!-- /tabs -->
 
@@ -354,17 +354,33 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    | Component | Use it for | Do not use it for |
    | --- | --- | --- |
    | `<Steps>` | A numbered procedure someone follows in order, such as the install steps | A numbered list that is really an enumeration |
-   | `<Tabs syncKey>` | One task with two tool-specific paths: Lando or DDEV, npm or yarn | A comparison, where seeing both at once is the point |
+   | `<Tabs syncKey>` | One task with two tool-specific paths: DDEV or Lando, npm or yarn | A comparison, where seeing both at once is the point |
    | `<FileTree>` | Where things live in the repository, with the parts worth knowing bolded | A complete listing. Show what someone works in |
 
    **`syncKey` is the reason tabs are worth it.** Every `<Tabs>` sharing a key
    switches together, across the whole site, and the choice persists between
-   pages. A reader picks Lando once and never sees DDEV again. Use one key per
+   pages. A reader picks DDEV once and never sees Lando again. Use one key per
    real choice, not one per page.
 
-   **A comparison table is not a candidate.** A table showing the Lando command
-   beside the DDEV command answers "what is the equivalent?", and tabs would
-   hide half of it. Convert a procedure; leave a comparison alone.
+   **DDEV and Lando always get their own tabs, and DDEV comes first.** When a
+   procedure has a DDEV path and a Lando path, split them into a
+   `local-environment` group rather than writing both into one block. Starlight
+   has no prop for the default tab: the first `<TabItem>` in the markup is the
+   one selected, until a reader picks another and their browser remembers it
+   under the `syncKey`. So order is the whole mechanism. Write
+   `<TabItem label="DDEV">` first and `<TabItem label="Lando">` second, in every
+   group on every page, and keep the labels spelled exactly that way, because
+   syncing matches on the label text. A project configured for only one of the
+   two gets no tab group: document the tool it has, as plain steps.
+
+   **A command table with a column per tool is split, not kept.** A reader
+   runs one tool, so a table with a DDEV column beside a Lando column becomes
+   one table per tab, same rows in the same order. The source markdown should
+   already be written that way (see "One tab per local environment" in the
+   documentation-rules skill); if it is not, fix the source rather than only
+   the site. What stays a table is an explanation of how the tools differ,
+   such as where each gets its database credentials, because comparing is its
+   whole purpose.
 
    `<Steps>` wraps a standard ordered list and needs no other change. Inside a
    tab or a step, indent the nested content to that item's continuation indent.

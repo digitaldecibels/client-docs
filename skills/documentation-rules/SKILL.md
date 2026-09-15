@@ -184,6 +184,31 @@ The exception is a trap: something that has cost someone an hour, or will.
 Explain that fully, including why, because the cost of it being missed is
 higher than the cost of the words.
 
+## One tab per local environment
+
+When a project has more than one local environment committed, such as DDEV and
+Lando, a reader uses one of them. Never make them read past the other.
+
+- **Every command that differs by tool goes in tab markers**, one tool per tab,
+  with DDEV first. That covers the quick start in the README, each installation
+  step, verification, troubleshooting, the commands reference and any workflow
+  section. The markers are `<!-- tabs:local-environment -->`,
+  `<!-- tab:DDEV -->`, `<!-- tab:Lando -->` and `<!-- /tabs -->`.
+- **Never write `# or` between two tools' commands**, never "run X, or Y", and
+  never a table with a column per tool. A reference table becomes one table per
+  tab, with the same rows in the same order.
+- **Shared text stays outside the tabs.** What both tools have in common is said
+  once, before the tab group. Only what differs goes inside.
+- **Explanations may still compare.** A table explaining where each tool gets
+  its database credentials answers "how do they differ?" and stays a table. The
+  rule is for things a reader types or follows.
+- **Check where each tool runs a command.** A wrapper defined in one tool's
+  config may run in a set directory while the other tool's built-in runs in
+  whatever directory you are in. If a command needs a `cd` under one tool, that
+  tab says so.
+
+A project with only one local environment gets no tabs.
+
 ## Make REQUIRES CONFIRMATION visible
 
 A confirmation marker buried in a paragraph gets skimmed past, which defeats

@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- DDEV and Lando are always split into their own tabs, and DDEV is written
+  first so it is the tab a new reader sees. Starlight has no default-tab
+  setting; the first `<TabItem>` is selected until the reader picks another,
+  so tab order is how the preference is expressed. A reader who has already
+  chosen Lando keeps Lando.
+- Every command that differs between local environments is now written in tab
+  markers when the docs are generated: the README quick start, installation
+  steps, verification, troubleshooting and the commands reference. No more
+  `# or` between two tools' commands, and no command table with a column per
+  tool. Such a table becomes one table per tab. Tables that explain how the
+  tools differ stay tables.
+
 ## [1.7.0] - 2026-09-12
 
 ### Added
