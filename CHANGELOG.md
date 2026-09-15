@@ -7,6 +7,17 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Added
+- An Open questions page in the Starlight site, generated from the manifest on
+  every `/docs-site` run. Every `requires_confirmation` entry is a card grouped
+  under the page it affects, with what is already known and a link to that
+  page. Answered questions are not listed. It sits last in the sidebar with a
+  badge showing the open count, so the number is visible from every page.
+- A rule that every REQUIRES CONFIRMATION marker on a page has a manifest
+  entry, because the Open questions page is built from the manifest alone.
+- `custom.css` gives every card one amber colour, where Starlight would cycle
+  four by position and make equal questions look like different severities.
+
 ### Changed
 - DDEV and Lando are always split into their own tabs, and DDEV is written
   first so it is the tab a new reader sees. Starlight has no default-tab

@@ -414,7 +414,59 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    `ARCHITECTURE` 4, `CONFIGURATION` 5, `DEPLOYMENT` 6, `INTEGRATIONS` 7, then
    anything else from 8. `README.md` becomes `index.md` so it is the home page.
 
-10. **Build it** with `npm run build` and report the result. If the build fails,
+10. **Generate the Open questions page**, `src/content/docs/open-questions.mdx`,
+   from the manifest. It is the list everyone working on the project can see
+   and work down, and it is built from data rather than copied from a doc, so
+   it is written fresh on every run. It lists **open items only**: an answered
+   question leaves the page, and its answer lives on the page it affected.
+
+   ```
+   ---
+   title: Open questions
+   description: What the repository cannot settle on its own, as a list to work through.
+   sidebar:
+     order: 100
+     badge:
+       text: "<number open>"
+       variant: caution        # success when nothing is open
+   ---
+
+   import { Card } from '@astrojs/starlight/components';
+   ```
+
+   The body is a one-line count ("14 open") and a sentence saying
+   `/docs-confirm` is how an item gets answered. Then every entry in
+   `requires_confirmation`, grouped under a `##` heading per affected page in
+   sidebar order, each in its own card. No checkboxes: this is a list of
+   questions, not a form, and a box nobody can tick invites clicking.
+
+   ```mdx
+   <Card title="<question>" icon="warning">
+
+   <known>
+
+   Affects [<page title>](../<page slug>/).
+
+   </Card>
+   ```
+
+   Card titles are rendered as HTML, so escape `&`, `<`, `>` and `"` in the
+   question and then turn backticked code into `<code>`. In the body, escape
+   `{`, `}` and `<`, which MDX would otherwise parse as JSX. Links are relative
+   (`../slug/`) so they survive any `base`. The page never shows an item that
+   is not in the manifest, which is why the consistency check in the
+   documentation-rules skill requires every visible marker to have an entry.
+
+   The sidebar badge is the reason it earns a place in the navigation: the
+   count is visible from every page. `order: 100` puts it last so it does not
+   push the setup pages down.
+
+   `custom.css` in the template gives every card the same amber. Starlight
+   otherwise colours card icons by position, orange, purple, green and red in
+   turn, which makes equal questions look like different severities. Keep that
+   rule when updating an existing site's `custom.css`.
+
+11. **Build it** with `npm run build` and report the result. If the build fails,
    report the error rather than deleting anything.
 
 ### What is excluded, in every mode

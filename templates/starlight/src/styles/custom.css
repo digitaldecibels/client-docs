@@ -34,3 +34,15 @@
   max-width: 100%;
   overflow-x: auto;
 }
+
+/* OPEN QUESTION CARDS
+
+   Starlight colours a card's icon by its position, cycling orange, purple,
+   green and red, so a list of cards reads as if the questions had different
+   severities. On the Open questions page they do not. One colour, the amber
+   of the "Requires confirmation" asides, which is what each card is. This file
+   is unlayered, so it wins over the component's layered nth-child rules. */
+.sl-markdown-content .card {
+  --sl-card-border: var(--sl-color-orange);
+  --sl-card-bg: var(--sl-color-orange-low);
+}

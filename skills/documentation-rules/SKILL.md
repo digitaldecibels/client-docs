@@ -234,6 +234,13 @@ Three rules:
 3. **Inside a list item, indent the aside** to the item's continuation indent.
    It renders correctly. A bullet that is entirely a confirmation marker is
    better as an aside in its own right, with the bullet dropped.
+4. **Every marker has a manifest entry.** Each aside or `**REQUIRES
+   CONFIRMATION**` cell needs an entry in `requires_confirmation` with an `id`,
+   the `question`, the page it `affects`, and what is already `known`. The
+   Starlight site's Open questions page is built from those entries alone, so
+   a marker without one is missing from the list people work from. Several
+   cells asking the same thing, such as one URL per environment, share one
+   entry.
 
 Plain markdown has no aside syntax, so `:::` shows literally when the file is
 read on disk or on a code host. That is an accepted cost where the site is the

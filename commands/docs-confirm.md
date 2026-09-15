@@ -41,6 +41,10 @@ Remove it from `requires_confirmation`. Then update the documentation it affects
 inside generated markers, replacing the REQUIRES CONFIRMATION block with the
 answer.
 
+If the project has a Starlight site (`docs/starlight/` exists), its Open
+questions page is built from this list, so say in the report that `/docs-site`
+needs to run for the answered items to move to Confirmed there.
+
 A human answer is high confidence from then on. Never overwrite it later from
 inference. If the code contradicts it, log a conflict, because they may know
 something about the hosting account that the repository cannot show.
