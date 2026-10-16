@@ -18,9 +18,9 @@
  *                          form open at once. A page assembly is a dozen
  *                          paragraphs deep and every one of them opened was an
  *                          unscrollable wall of form.
- *   closed_mode  preview   A collapsed child shows a rendered preview instead
- *                          of the one-line text summary, so an editor can tell
- *                          two cards apart by looking at them.
+ *   closed_mode  summary   A collapsed child shows a one-line text summary
+ *                          of its fields. Always summary, on every paragraph
+ *                          type. See below for why not preview.
  *   autocollapse all       Saving or reordering one child re-collapses the
  *                          rest, so the form does not creep back open over a
  *                          long editing session.
@@ -42,13 +42,20 @@
  * four settings listed below and leaves every other setting on the widget
  * alone, so hand-set ones survive.
  *
- * PREVIEW RENDERS THE REAL COMPONENT
+ * SUMMARY, NOT PREVIEW
  *
- * `closed_mode: preview` renders the child through the `preview` view mode,
- * falling back to `default` where no preview display is enabled, which is the
- * usual case. That is the component's own markup, drawn inside the admin
- * theme, so it appears without the front end's CSS. It is still more use than
- * a text summary for anything with an image.
+ * Decided on 2026-09-15: every paragraph type uses `closed_mode: summary`.
+ *
+ * `preview` renders the child through the `preview` view mode, falling back to
+ * `default`, which is the component's own markup drawn inside the admin theme
+ * without the front end's CSS. It is not what the page looks like, and a form
+ * a dozen paragraphs deep fills with unstyled components. The one-line summary
+ * is shorter and reads the same on every type.
+ *
+ * On the site this came from, both values had crept into the exported config
+ * because this script said one thing and hand edits in the UI said the other.
+ * Change it here and in the paragraph creation script together, or the next
+ * run of either puts the mix back.
  *
  * WHAT RUNS DRUSH
  *
@@ -68,7 +75,7 @@ $log = function (string $action, string $what) {
 // Only these keys are touched. Everything else on the widget is left as it is.
 $settings = [
   'edit_mode' => 'closed',
-  'closed_mode' => 'preview',
+  'closed_mode' => 'summary',
   'autocollapse' => 'all',
   'add_mode' => 'dropdown',
 ];

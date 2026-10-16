@@ -28,6 +28,18 @@ tabs:
 site:
   # Sidebar order. Documents not listed follow, alphabetically.
   order: [README, INSTALLATION, DEVELOPMENT, ARCHITECTURE, CONTENT-MODEL, MODULES, CONFIGURATION, DEPLOYMENT, INTEGRATIONS, CHANGELOG]
+  # Sidebar sections. Empty means one flat list. Each group has a label, the
+  # pages in it in the order they should appear, and optionally
+  # `collapsed: true`. A group sits where its earliest page falls in `order`.
+  # Pages in no group stay at the top level. Needs astro.config.mjs to import
+  # src/sidebar.mjs, which a site created by plugin 1.9.0 or later does.
+  # For example:
+  #   groups:
+  #     - label: Getting started
+  #       pages: [INSTALLATION, DEVELOPMENT]
+  #     - label: How it's built
+  #       pages: [ARCHITECTURE, CONTENT-MODEL, MODULES]
+  groups: []
   # Written to docs/ but not published on the site. CLIENT-HANDOFF is never
   # published, whatever this says.
   exclude: []
@@ -61,3 +73,28 @@ branding:
   logo: null
   # Overrides the site title, which otherwise comes from project.name.
   title: null
+
+# Audience and customer tagging, for projects that also feed these documents to
+# a chatbot. Leave enabled false and nothing below applies: documents build
+# exactly as they always have.
+#
+# When enabled, each document carries a block at the top saying who it is for:
+#
+#   ---
+#   audience: staff      # staff | family
+#   customer: all        # all, or one of the customers listed below
+#   chat: true           # false publishes the page but keeps it out of the chatbot
+#   ---
+#
+# A document with no such block is published as before and never indexed, which
+# is what keeps hand-written planning documents out of the chatbot.
+#
+# Documents for the client's own customers (audience: family), and documents
+# specific to one customer, are indexed but NOT published: the built site is one
+# artefact shared by every customer, so it cannot differ between them. Nothing
+# published may link to one of those, or the site build fails.
+chat:
+  enabled: false
+  # Only for one codebase deployed as several customer sites. A customer tag
+  # that is not listed here is reported as a probable typo.
+  customers: []

@@ -16,7 +16,7 @@ writes anything:
 
 | File | Holds | Written by |
 | --- | --- | --- |
-| `docs/client-docs.config.yml` | Structured choices: documents to skip, tab groups and their order, sidebar order, the Open questions page, branding | The developer. `/docs-init` creates it once; nothing else writes it |
+| `docs/client-docs.config.yml` | Structured choices: documents to skip, tab groups and their order, sidebar order and groups, the Open questions page, branding | The developer. `/docs-init` creates it once; nothing else writes it |
 | `docs/client-docs.rules.md` | Plain-sentence rules a setting cannot express: what the client calls things, what not to document, who reads which page | The developer, only |
 
 Precedence, highest first:
@@ -299,6 +299,59 @@ from what is merely true.
 
 Developer documentation can assume the reader knows the stack. It still should
 not assume they know *this* project.
+
+## Audience and customer tags
+
+Only for projects whose `docs/client-docs.config.yml` sets `chat.enabled: true`.
+When it is absent or false, ignore this section entirely and write documents as
+before.
+
+These projects feed the same documents to a chatbot, which has to know who each
+page is for. The answer lives in a block at the very top of the file, before the
+provenance comment:
+
+```markdown
+---
+audience: staff      # staff | family
+customer: all        # all, or one of chat.customers
+chat: true           # optional; false publishes the page but keeps it out of chat
+---
+```
+
+Treat this block the way you treat the provenance comment: plugin-managed
+metadata that you write and maintain, not content. Write it on every document you
+generate when `chat.enabled` is true.
+
+**A document with no block is never indexed.** That is deliberate, and it is what
+keeps hand-written planning documents out of the chatbot. Never add the block to
+a document the project's rules tell you not to touch.
+
+**What each audience means.** `staff` is the client's own people, the readers of
+the staff guide. `family` is the client's customers, the people who use the
+public side of the application. A family page is written to them directly, in the
+second person, and describes only screens they can reach. It never mentions a
+staff-only screen, even in passing.
+
+**Customer tags** are for projects deployed as one site per customer from one
+codebase. A page tagged with a specific customer is indexed for that customer
+only. To tag one section of an otherwise shared page, put a marker on the line
+directly under its heading:
+
+```markdown
+## Refund policy
+<!-- docs: customer=prodigy -->
+```
+
+It applies until the next heading at the same or a higher level.
+
+**The rule that catches people out:** pages tagged `audience: family`, and pages
+tagged with a specific customer, are not published to the site at all. They reach
+readers only through the chatbot. So **no published page may link to one**, and no
+family page may link out to a staff page. The site build fails on a link to an
+unpublished page, which is the intended safety net, but it fails at commit time
+and is easier to avoid than to debug.
+
+After changing any tagged document, tell the developer to run `/docs-index`.
 
 ## The consistency check, before you finish
 

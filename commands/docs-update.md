@@ -38,6 +38,11 @@ nothing, including the manifest.
 - Append changelog entries if `CHANGELOG.md` exists, using the `changelog`
   skill's rules. Do not create it.
 - Regenerate `docs/site/` if it exists.
+- Rebuild `docs/starlight/` if it exists, with Homebrew's Node and no version
+  check first:
+  `PATH="/opt/homebrew/opt/node/bin:$PATH" node ${CLAUDE_PLUGIN_ROOT}/scripts/build-starlight.mjs .`
+  then `PATH="/opt/homebrew/opt/node/bin:$PATH" npm run build` in
+  `docs/starlight/`. See `/docs-site` for why.
 - Ask up to three outstanding confirmations at the end. Skipping is fine.
 - Report the open conflict count and the file path, in one line.
 

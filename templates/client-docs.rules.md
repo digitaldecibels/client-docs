@@ -12,7 +12,7 @@ not obvious, why. For example:
   `web/themes/example/COMPONENTS.md`.
 - INTEGRATIONS.md is read by the client, so write it without developer jargon.
 
-Structured choices (which documents exist, tab order, sidebar order, the Open
+Structured choices (which documents exist, tab order, sidebar order and groups, the Open
 questions page, colours) belong in `client-docs.config.yml`, not here.
 
 What a rule here cannot change: the plugin never invents a fact the repository

@@ -32,7 +32,7 @@ Four scripts are finished as they stand and can be run straight away:
 | `configure-image-styles.php` | Makes every image style output WebP, including the two-convert-plugin case that quietly doubles the effect |
 | `configure-links.php` | Linkit on every link field on the site, with `target` allowed and `rel` deliberately not |
 | `configure-media.php` | The focal point widget on both of the image media type's entry forms, which are separate config and easy to half-configure |
-| `configure-paragraph-widgets.php` | Nested paragraphs collapsed, previewed, re-collapsing after each save, added from one dropdown |
+| `configure-paragraph-widgets.php` | Nested paragraphs collapsed to a one-line summary, re-collapsing after each save, added from one dropdown |
 
 Four are templates with the content emptied out:
 

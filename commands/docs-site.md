@@ -136,37 +136,39 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    template carries a `head` script that labels them. Check whether it is still
    needed before keeping it.
 
-   **Check Node first, and check it before installing, not after.** Astro
-   refuses to run on a Node older than it supports, and the failure is worse
-   than a clean refusal: installing under an old Node silently skips the
-   platform-native build binaries, so a later run on a newer Node dies with
-   `Cannot find module '@rolldown/binding-...'` rather than a version message.
-   Recovering means reinstalling, not just switching Node.
-
-   ```bash
-   node -v                                    # what the shell will use
-   node -p "require('astro/package.json').engines.node"   # what Astro needs
-   ```
-
-   If the default Node is too old, look for a newer one already on the machine
-   (`/opt/homebrew/opt/node/bin/node`, nvm, fnm, volta) and put it first on
-   `PATH` **for this build only**. Never change the developer's default Node:
-   on a project like a Drupal site with a Vite theme build, the default is
-   pinned to something the rest of the project depends on.
+   **Always run Node from Homebrew, never the shell's default.** Put
+   `/opt/homebrew/opt/node/bin` first on `PATH` for every Node command in this
+   command and in `/docs-update`'s rebuild: the install, the content script and
+   the build. Do not run `node -v` first to see whether the default would do.
+   The default is usually pinned by nvm to an older Node that the project's
+   theme build depends on, and Astro refuses it.
 
    ```bash
    PATH="/opt/homebrew/opt/node/bin:$PATH" npm install
    PATH="/opt/homebrew/opt/node/bin:$PATH" npm run build
    ```
 
-   If no new enough Node exists, stop and say so. Installing one is the
-   developer's call, not yours.
+   Set `PATH` per command like this. Never change the developer's default Node.
+
+   Install under the same Node you build with. Installing under an old Node
+   silently skips the platform-native build binaries, so a later build on a
+   newer Node dies with `Cannot find module '@rolldown/binding-...'` rather than
+   a version message, and recovering means reinstalling.
+
+   If `/opt/homebrew/opt/node/bin/node` does not exist, or is older than
+   `node -p "require('astro/package.json').engines.node"` asks for, stop and
+   say so. Installing or upgrading Node is the developer's call, not yours.
 
 2. **If it already exists**, leave `astro.config.mjs`, `package.json` and
    `src/styles/custom.css` alone. They are the developer's now. Regenerate the
-   content and `src/styles/brand.css`, and nothing else. If the project's
-   primary colour has changed since last time, say so in the report rather than
-   changing it silently.
+   content, `src/sidebar.mjs` and `src/styles/brand.css`, and nothing else. If
+   the project's primary colour has changed since last time, say so in the
+   report rather than changing it silently.
+
+   The one exception is the sidebar import. A site created before plugin 1.9.0
+   has no `import sidebar from './src/sidebar.mjs'` and no `sidebar,` option, so
+   `site.groups` has no effect there and the script warns. If the project sets
+   `site.groups`, add those two lines, and say in the report that you did.
 
 3. **Read the project's settings and rules first.** `docs/client-docs.config.yml`
    and `docs/client-docs.rules.md`, as described in "The project's own settings
@@ -401,10 +403,10 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    did not:
 
    ```bash
-   node ${CLAUDE_PLUGIN_ROOT}/scripts/build-starlight.mjs <repository root>
+   PATH="/opt/homebrew/opt/node/bin:$PATH" node ${CLAUDE_PLUGIN_ROOT}/scripts/build-starlight.mjs <repository root>
    ```
 
-   Use the same Node chosen in step 1. It needs no install of its own: it reads
+   Homebrew's Node, as in step 1. It needs no install of its own: it reads
    YAML with the `js-yaml` that Astro already puts in `docs/starlight/`.
 
    It reads the settings file and the manifest, and writes every page into
@@ -418,6 +420,7 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    - adds a description per `site.descriptions`; the home page always uses
      `project.description`
    - sets the sidebar order from `site.order`, with unlisted pages after it
+   - writes `src/sidebar.mjs` from `site.order` and `site.groups` (step 9)
    - turns tab, steps and filetree markers into components, honouring the
      `tabs` and `site.components` settings, and writes `.mdx` only when a
      component is used
@@ -431,10 +434,26 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    Do not edit its output by hand to change how a page renders. Change the
    settings, the markers in `docs/*.md`, or the script, then run it again.
 
-9. **The sidebar**, from `site.order`. The plugin default reads in the order a
-   person needs it: README, INSTALLATION, DEVELOPMENT, ARCHITECTURE,
-   CONTENT-MODEL, MODULES, CONFIGURATION, DEPLOYMENT, INTEGRATIONS, CHANGELOG.
-   `README.md` becomes `index` so it is the home page.
+9. **The sidebar**, from `site.order` and `site.groups`. The plugin default
+   reads in the order a person needs it: README, INSTALLATION, DEVELOPMENT,
+   ARCHITECTURE, CONTENT-MODEL, MODULES, CONFIGURATION, DEPLOYMENT,
+   INTEGRATIONS, CHANGELOG. `README.md` becomes `index` so it is the home page.
+
+   `site.groups` splits the list into labelled sections. Each group sits where
+   its earliest page falls in `site.order` and lists its pages in the order it
+   names them. Pages in no group stay at the top level, and so does the Open
+   questions page, placed by its own `position`. The script writes the result
+   to `src/sidebar.mjs`, which `astro.config.mjs` passes to Starlight as
+   `sidebar`.
+
+   Every entry names a page by slug rather than repeating its title, because
+   Starlight then takes the label and badge from the page's frontmatter. That
+   is what keeps the open question count on the sidebar link. Checked against
+   Starlight 0.42's `linkFromInternalSidebarLinkItem`.
+
+   The script warns, rather than failing, when a group names a page that is not
+   published, when a page is in two groups (the first keeps it), and when
+   groups are set but `astro.config.mjs` does not import the file.
 
 10. **The Open questions page** is written by the same script when
    `site.open_questions.enabled` is true: `open-questions.mdx`, listing every
@@ -456,7 +475,8 @@ Say this in the report. Someone will otherwise edit the copy and lose it.
    turn, which makes equal questions look like different severities. Keep that
    rule when updating an existing site's `custom.css`.
 
-11. **Build it** with `npm run build` and report the result. If the build fails,
+11. **Build it** with `PATH="/opt/homebrew/opt/node/bin:$PATH" npm run build`
+   from `docs/starlight/`, and report the result. If the build fails,
    report the error rather than deleting anything.
 
 ### What is excluded, in every mode

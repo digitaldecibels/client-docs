@@ -13,6 +13,11 @@
 // removed from the settings disappears from the site. --out writes elsewhere
 // instead, which is how to compare a run against the live content.
 //
+// Also writes docs/starlight/src/sidebar.mjs, the sidebar built from site.order
+// and site.groups. astro.config.mjs has to import it for groups to show; when it
+// does not, Starlight builds a flat sidebar from each page's sidebar.order, and
+// the script says so if groups are set. With --out it lands in that directory.
+//
 // It does not touch astro.config.mjs, package.json, custom.css or brand.css,
 // and it does not run the Astro build. Colour is a judgement step, described in
 // commands/docs-site.md, not something this script decides.
@@ -71,6 +76,7 @@ const DEFAULTS = {
       'README', 'INSTALLATION', 'DEVELOPMENT', 'ARCHITECTURE', 'CONTENT-MODEL',
       'MODULES', 'CONFIGURATION', 'DEPLOYMENT', 'INTEGRATIONS', 'CHANGELOG',
     ],
+    groups: [],
     exclude: [],
     descriptions: 'first-sentence',
     components: { tabs: true, steps: true, filetree: true },
@@ -82,6 +88,11 @@ const DEFAULTS = {
       icon: 'warning',
     },
   },
+  // Audience and customer tagging, for projects that also feed these documents
+  // to a chatbot. Off by default: with chat.enabled false, a document's tags are
+  // read but never change what is published, so existing projects build exactly
+  // as they did before.
+  chat: { enabled: false, customers: [] },
   // Not used by this script. Listed so their keys are recognised.
   branding: { primary: null, secondary: null, logo: null, title: null },
 };
@@ -130,15 +141,90 @@ const excluded = new Set([
   ...upper(settings.site.exclude),
 ]);
 
+// Problems with a document's tags. Reported at the end, never fatal: a mistyped
+// tag should not stop the site building.
+const warnings = [];
+
+/**
+ * Reads the audience/customer block a document may carry.
+ *
+ * Flat "key: value" lines between two --- fences, at the very top of the file.
+ * Deliberately not a YAML parser: the same three keys are read on the PHP side
+ * by the indexer, and two parsers that disagree about an edge case would publish
+ * a page the chatbot thinks is private.
+ *
+ * Returns { meta, body, present }. body always has the block removed, so every
+ * offset-anchored match below still sees the document it expects.
+ */
+function readFrontmatter(text) {
+  if (!text.startsWith('---\n') && !text.startsWith('---\r\n')) {
+    return { meta: {}, body: text, present: false };
+  }
+  const normalised = text.replace(/\r\n/g, '\n');
+  const end = normalised.indexOf('\n---', 3);
+  if (end === -1) return { meta: {}, body: text, present: false };
+
+  const meta = {};
+  for (const line of normalised.slice(4, end).split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const colon = trimmed.indexOf(':');
+    if (colon === -1) continue;
+    const key = trimmed.slice(0, colon).trim().toLowerCase();
+    let value = trimmed.slice(colon + 1).trim();
+    const hash = value.indexOf(' #');
+    if (hash !== -1) value = value.slice(0, hash).trimEnd();
+    meta[key] = value.replace(/^['"]|['"]$/g, '');
+  }
+  return { meta, body: normalised.slice(end + 4).replace(/^\n+/, ''), present: true };
+}
+
+const chatCustomers = new Set((settings.chat.customers ?? []).map((c) => String(c).toLowerCase()));
+
+/**
+ * Whether a tagged document belongs on the published site.
+ *
+ * Family pages and customer-specific pages are chat-only. The built site is
+ * committed once and served by every customer's site, so it cannot differ per
+ * customer without filtering at serve time; until it can, those pages are
+ * reachable through the chatbot and nowhere else.
+ */
+function publishable(meta, present, name) {
+  if (!present) return true;
+  const audience = (meta.audience ?? 'staff').toLowerCase();
+  const customer = (meta.customer ?? 'all').toLowerCase();
+  // Public pages are for visitors, not staff: the site that uses this shows
+  // them itself (tc9's /help), as it does family pages.
+  if (audience === 'family' || audience === 'public') return { skip: true, why: `audience: ${audience}` };
+  if (customer !== 'all') {
+    if (settings.chat.enabled && chatCustomers.size && !chatCustomers.has(customer)) {
+      warnings.push(`${name}.md is tagged customer "${customer}", which is not in chat.customers.`);
+    }
+    return { skip: true, why: `customer: ${customer}` };
+  }
+  return { skip: false };
+}
+
 const sources = [];
+const chatOnly = [];
+function addSource(name, slug, file) {
+  const { meta, present } = readFrontmatter(fs.readFileSync(file, 'utf8'));
+  const verdict = publishable(meta, present, name);
+  if (verdict.skip) {
+    chatOnly.push({ name, why: verdict.why });
+    return;
+  }
+  sources.push({ name, slug, file });
+}
+
 if (fs.existsSync(path.join(root, 'README.md')) && !excluded.has('README')) {
-  sources.push({ name: 'README', slug: 'index', file: path.join(root, 'README.md') });
+  addSource('README', 'index', path.join(root, 'README.md'));
 }
 for (const f of fs.readdirSync(docsDir).sort()) {
   if (!f.endsWith('.md') || f.startsWith('.')) continue;
   const name = nameOf(f);
   if (excluded.has(name.toUpperCase())) continue;
-  sources.push({ name, slug: name, file: path.join(docsDir, f) });
+  addSource(name, name, path.join(docsDir, f));
 }
 
 const siteOrder = upper(settings.site.order);
@@ -152,6 +238,42 @@ const unordered = sources
   .map((s) => s.name)
   .sort();
 const orderOf = (name) => sidebarOrder(name) ?? siteOrder.length + 1 + unordered.indexOf(name);
+
+// ---------------------------------------------------------------------------
+// Sidebar groups
+
+// Each group is { label, pages, collapsed }. A group sits in the sidebar where
+// the earliest of its pages falls in site.order, and lists its pages in the
+// order it names them. Pages in no group stay at the top level.
+const GROUP_KEYS = ['label', 'pages', 'collapsed'];
+const groupWarnings = [];
+const linkWarnings = [];
+const published = new Set(sources.map((s) => s.name.toUpperCase()));
+const groupOf = new Map();
+const groups = [];
+for (const [i, g] of (Array.isArray(settings.site.groups) ? settings.site.groups : []).entries()) {
+  const at = `site.groups[${i}]`;
+  if (!g || typeof g !== 'object' || typeof g.label !== 'string' || !Array.isArray(g.pages)) {
+    groupWarnings.push(`${at} needs a label and a list of pages, and was ignored`);
+    continue;
+  }
+  unknown.push(...Object.keys(g).filter((k) => !GROUP_KEYS.includes(k)).map((k) => `${at}.${k}`));
+  const pages = [];
+  for (const page of upper(g.pages)) {
+    if (!published.has(page)) {
+      groupWarnings.push(`${at} (${g.label}) names ${page}, which is not published`);
+    } else if (groupOf.has(page)) {
+      groupWarnings.push(`${page} is in two groups; it stays in ${groupOf.get(page).label}`);
+    } else {
+      pages.push(page);
+    }
+  }
+  if (!pages.length) continue;
+  const group = { label: g.label, collapsed: g.collapsed === true, pages };
+  for (const page of pages) groupOf.set(page, group);
+  groups.push(group);
+}
+if (!Array.isArray(settings.site.groups)) groupWarnings.push('site.groups has to be a list, and was ignored');
 
 // ---------------------------------------------------------------------------
 // Conversion
@@ -242,7 +364,10 @@ function convertTabs(lines, used) {
 }
 
 function convert(source) {
-  let s = fs.readFileSync(source.file, 'utf8');
+  // Tags come off first. The provenance strip below is anchored to the start of
+  // the file, so a frontmatter block left in place would push it out of reach
+  // and the comment would be published as page content.
+  let s = readFrontmatter(fs.readFileSync(source.file, 'utf8')).body;
   s = s.replace(/^<!--\nGenerated by client-docs[\s\S]*?-->\n\n/, '');
   const h1 = s.match(/^# (.+)\n\n?/m);
   const title = h1 ? h1[1].trim() : source.name;
@@ -272,6 +397,23 @@ function convert(source) {
   }
 
   s = convertTabs(s.split('\n'), used).join('\n');
+
+  // Links between documents. On disk, [X](CONFIGURATION.md) sits next to the
+  // file it points at; on the site every page is a directory of its own, so the
+  // link has to name that directory, relative to this page's. The home page is
+  // one level up from the rest. A link to a document that is not published is
+  // left alone and reported, because there is nothing on the site to point at.
+  const up = source.slug === 'index' ? './' : '../';
+  s = s.replace(/\]\(((?:\.\.?\/)*(?:docs\/)?([A-Za-z0-9_-]+)\.md)(#[^)\s]*)?\)/g, (whole, target, file, anchor = '') => {
+    const name = file.toUpperCase() === 'README' ? 'README' : nameOf(`${file}.md`);
+    const page = sources.find((p) => p.name.toUpperCase() === name.toUpperCase());
+    if (!page) {
+      linkWarnings.push(`${source.name} links to ${target}, which is not published`);
+      return whole;
+    }
+    const href = page.slug === 'index' ? up : `${up}${page.slug.toLowerCase()}/`;
+    return `](${href}${anchor})`;
+  });
 
   if (components.filetree && /<!-- filetree -->/.test(s)) {
     s = s.replace(/^([ \t]*)<!-- filetree -->$/gm, '$1<FileTree>')
@@ -380,6 +522,53 @@ if (settings.site.open_questions.enabled) {
   report.push(`open-questions.mdx (${n} open)`);
 }
 
+// The sidebar. Entries name pages by slug, so Starlight still takes each label
+// and badge from the page's own frontmatter, including the open count.
+const slugOf = (source) => (source.slug === 'index' ? 'index' : source.slug.toLowerCase());
+const byName = new Map(sources.map((s) => [s.name.toUpperCase(), s]));
+const topLevel = [];
+const placed = new Set();
+for (const source of [...sources].sort((a, b) => orderOf(a.name) - orderOf(b.name))) {
+  const group = groupOf.get(source.name.toUpperCase());
+  if (!group) {
+    topLevel.push({ key: orderOf(source.name), entry: slugOf(source) });
+  } else if (!placed.has(group)) {
+    placed.add(group);
+    topLevel.push({
+      key: orderOf(source.name),
+      entry: {
+        label: group.label,
+        collapsed: group.collapsed,
+        items: group.pages.map((page) => slugOf(byName.get(page))),
+      },
+    });
+  }
+}
+if (settings.site.open_questions.enabled) {
+  const position = settings.site.open_questions.position;
+  const key = position === 'first' ? 0 : typeof position === 'number' ? position : Infinity;
+  topLevel.push({ key, entry: 'open-questions' });
+}
+topLevel.sort((a, b) => a.key - b.key);
+
+const sidebarFile = outArg ? path.join(outDir, 'sidebar.mjs') : path.join(siteDir, 'src/sidebar.mjs');
+fs.writeFileSync(sidebarFile, [
+  '// Generated by client-docs from site.order and site.groups in',
+  '// docs/client-docs.config.yml. Edit the settings and rebuild, not this file.',
+  '// astro.config.mjs imports it as the Starlight `sidebar` option.',
+  `export default ${JSON.stringify(topLevel.map((t) => t.entry), null, 2)};`,
+  '',
+].join('\n'));
+
+const astroConfig = path.join(siteDir, 'astro.config.mjs');
+const importsSidebar = fs.existsSync(astroConfig) && /sidebar\.mjs/.test(fs.readFileSync(astroConfig, 'utf8'));
+if (groups.length && !importsSidebar) {
+  groupWarnings.push(
+    'site.groups is set, but astro.config.mjs does not import src/sidebar.mjs, so the sidebar stays flat. ' +
+    "Add `import sidebar from './src/sidebar.mjs';` at the top and `sidebar,` inside starlight({ ... })",
+  );
+}
+
 const removed = [];
 for (const f of fs.readdirSync(outDir)) {
   if (/\.mdx?$/.test(f) && !written.has(f)) {
@@ -389,7 +578,15 @@ for (const f of fs.readdirSync(outDir)) {
 }
 
 if (unknown.length) console.warn(`Unknown settings, ignored: ${unknown.join(', ')}`);
+for (const w of groupWarnings) console.warn(`Sidebar: ${w}`);
+for (const w of linkWarnings) console.warn(`Links: ${w}`);
+for (const w of warnings) console.warn(`Tags: ${w}`);
+if (chatOnly.length) {
+  console.log(`Not published, available through the chatbot only:`);
+  for (const p of chatOnly) console.log(`  ${p.name} (${p.why})`);
+}
 console.log(`Settings: ${fs.existsSync(configFile) ? 'docs/client-docs.config.yml' : 'plugin defaults (no docs/client-docs.config.yml)'}`);
 console.log(`Wrote ${written.size} pages to ${path.relative(root, outDir) || outDir}:`);
 for (const line of report) console.log(`  ${line}`);
 if (removed.length) console.log(`Removed: ${removed.join(', ')}`);
+console.log(`Sidebar: ${path.relative(root, sidebarFile)}, ${groups.length ? `${groups.length} groups` : 'no groups'}${importsSidebar ? '' : ' (not imported by astro.config.mjs)'}`);

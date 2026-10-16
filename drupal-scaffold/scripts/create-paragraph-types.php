@@ -211,13 +211,13 @@ $widgets = [
   'entity_reference_revisions' => ['type' => 'paragraphs', 'settings' => [
     'title' => 'Item',
     'title_plural' => 'Items',
-    // Collapsed children showing a rendered preview, re-collapsing after each
-    // save, added from one dropdown button. These four are also swept across
+    // Collapsed children showing a one-line summary, never a rendered preview,
+    // re-collapsing after each save, added from one dropdown button. These four are also swept across
     // every existing field by configure-paragraph-widgets.php, and the two
     // have to stay in step: whichever runs last wins, so a change here that is
     // not made there is undone by the next sweep, and the reverse.
     'edit_mode' => 'closed',
-    'closed_mode' => 'preview',
+    'closed_mode' => 'summary',
     'autocollapse' => 'all',
     'closed_mode_threshold' => 0,
     'add_mode' => 'dropdown',

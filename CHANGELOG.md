@@ -7,6 +7,51 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-09-22
+
+### Added
+- Audience and customer tags on documentation files, for projects that also feed
+  their documents to a chatbot. A block of `audience`, `customer` and `chat` at
+  the top of a file says who the page is for. Off unless
+  `chat.enabled: true` is set in `docs/client-docs.config.yml`; a project without
+  it builds byte-for-byte as before, and an untagged file is treated as staff and
+  shared.
+- Documents tagged `audience: family`, or tagged with a specific customer, are
+  kept out of the built site and reported as available through the chatbot only.
+  The site is one artefact shared by every customer, so it cannot differ between
+  them; serve-time filtering would be needed for that.
+- A `<!-- docs: customer=... -->` marker directly under a heading tags one
+  section of an otherwise shared page, until the next heading at the same or a
+  higher level.
+- `/docs-index` updates a project's chatbot index and reports every page it
+  skipped, with the reason.
+- `chat.enabled` and `chat.customers` in `docs/client-docs.config.yml`. A
+  customer tag that is not in `chat.customers` is reported as a probable typo.
+
+### Fixed
+- `build-starlight.mjs` strips a document's tag block before looking for the
+  provenance comment. That search is anchored to the start of the file, so a
+  tagged document would otherwise have published the comment as page content.
+
+## [1.9.0] - 2026-09-15
+
+### Added
+- `site.groups` in `docs/client-docs.config.yml` splits the Starlight sidebar
+  into labelled sections. Each group names its pages and can start collapsed;
+  it sits where its earliest page falls in `site.order`, and pages in no group
+  stay at the top level. Empty, the default, keeps one flat list.
+- `scripts/build-starlight.mjs` writes `docs/starlight/src/sidebar.mjs` on
+  every run. Entries name pages by slug, so labels and the Open questions count
+  badge still come from each page's frontmatter. It warns about a group naming
+  an unpublished page, a page in two groups, and groups set on a site whose
+  `astro.config.mjs` does not import the file.
+
+### Changed
+- The Starlight `astro.config.mjs` template imports `src/sidebar.mjs` and
+  passes it as `sidebar`, where it previously left the sidebar to Starlight's
+  file-based default. An existing site keeps its own config; `/docs-site` adds
+  the two lines only when the project sets `site.groups`.
+
 ## [1.8.0] - 2026-09-15
 
 ### Added

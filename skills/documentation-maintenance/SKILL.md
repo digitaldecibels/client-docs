@@ -192,10 +192,21 @@ The developer should not need to remember a second command.
   that is `/docs-changelog`'s job.
 - **`docs/site/`**, if it exists, is regenerated. It is cheap and it stops the
   site lagging the markdown.
+- **`docs/starlight/`**, if it exists, is rebuilt: the content script, then
+  `npm run build`, both run with `/opt/homebrew/opt/node/bin` first on `PATH`.
+  Go straight to Homebrew's Node. The shell's default is often too old for
+  Astro, and checking it first only costs a failed build. `/docs-site` has the
+  exact commands.
 - **Outstanding confirmations**: ask up to three of the most important at the
   end. Skipping is always fine. Say how many remain and that `/docs-confirm`
   handles the rest.
 - **Open conflicts**: one line with the count and the path.
+- **The chatbot index**, when `docs/client-docs.config.yml` sets
+  `chat.enabled: true`. Any change to a tagged document means the chatbot is
+  still answering from the old wording until it is reindexed, so run
+  `/docs-index` and report what it says. A project with a pre-commit hook does
+  this on commit anyway; running it here just means the gap is minutes rather
+  than however long until the next commit.
 
 ## Reporting
 
@@ -234,6 +245,13 @@ repositories written at different times.
 not exist, then remove the block from the manifest. Tell the developer once,
 in one line, where their settings now live. If both places have a value and
 they differ, keep the settings file's and say so.
+
+**Audience and customer tags arrived in 1.10.0.** Additive, and inert unless
+`chat.enabled: true` is set in `docs/client-docs.config.yml`, so there is nothing
+to migrate. In a project that does set it, add the tag block to any generated
+document that lacks one, following `documentation-rules`. Never add it to a
+document the project's rules say not to touch: an untagged document is simply
+never indexed, which is the intended way to keep planning notes out of a chatbot.
 
 Never fail because a manifest is old. An old manifest still knows more than no
 manifest.
